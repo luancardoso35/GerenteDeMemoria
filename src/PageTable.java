@@ -2,12 +2,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PageTable {
+    private String processName;
     private ItemTabelaDePagina[] linhas;
     private short finalDoHeap;
     private int ocupacaoUltimaPagina;
     private short topoDaPilha;
 
-    public PageTable(){
+    public PageTable(String processName){
+        this.processName = processName;
         linhas = new ItemTabelaDePagina[32];
         finalDoHeap = -1;
         ocupacaoUltimaPagina = -1;  //Quantos bytes são utilizados na última página alocada
@@ -62,7 +64,7 @@ public class PageTable {
     }
 
     /*
-     *Adiciona as páginas de de pilha
+     *Adiciona as páginas de pilha
      */
     public void setPilha(ArrayList<Integer>quadros){
         for(int i : quadros){
@@ -91,5 +93,20 @@ public class PageTable {
             }
         }
         return sb.toString();
+    }
+
+    public String getProcessName() {
+        return processName;
+    }
+
+    public ItemTabelaDePagina getLinha(int pagina){
+        return linhas[pagina];
+    }
+
+    /*
+     * Adiciona uma nova linha ao array de linhas
+     */
+    private void setLinha(int index, ItemTabelaDePagina item){
+        linhas[index] = item;
     }
 }

@@ -24,7 +24,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public int loadProcessToMemory(String processName) throws NoSuchFileException, FileFormatException, MemoryOverflowException {
-        PageTable pt = new PageTable();
+        PageTable pt = new PageTable(processName);
 
         final ArrayList<String> text = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir") +
@@ -116,6 +116,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         StringBuilder sb = new StringBuilder();
         for (boolean b: mapaBits) {
             sb.append(b);
+            sb.append(" ");
         }
         return sb.toString();
     }
@@ -130,6 +131,11 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public String[] getProcessList() {
-        return new String[0];
+        String[] processList = new String[pageTableArrayList.size()];
+        for (int processNumber = 0; processNumber < pageTableArrayList.size(); processNumber++) {
+            processList[processNumber] = "Processo " + processNumber + " - " +
+                    pageTableArrayList.get(processNumber).getProcessName();
+        }
+        return processList;
     }
 }
