@@ -108,16 +108,38 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public int getPhysicalAddress(int processId, int logicalAddress) throws InvalidProcessException, InvalidAddressException {
-        return 0;
+        if (processId < 0 || processId >= pageTableArrayList.size()) {
+            throw new InvalidProcessException("Número de processo inválido");
+        }
+        if(logicalAddress < 0 || logicalAddress > 1023){
+           throw new InvalidProcessException("O endereco lógico deve ser um valor entre 0 e 1023");
+        }
+        String enderecoBin = Integer.toBinaryString(logicalAddress);
+        String paginaStr = enderecoBin.substring(0,5);
+        int paginaInt = Integer.parseInt(paginaStr, 2);
+        String deslocamentoStr = enderecoBin.substring(6,10);
+        int deslocamentoInt = Integer.parseInt(deslocamentoStr, 2);
+
+        ItemTabelaDePagina itp = pageTableArrayList.get(processId).getLinha(paginaInt);
+        int quadro = -1;
+        if (itp == null) {
+            throw new InvalidAddressException("Endereço lógico inválido");
+        } else {
+            quadro = itp.getQuadro();
+        }
+
+        return quadro + deslocamentoInt;
     }
 
     @Override
     public String getBitMap() {
         StringBuilder sb = new StringBuilder();
+        sb.append("[ ");
         for (boolean b: mapaBits) {
             sb.append(b);
             sb.append(" ");
         }
+        sb.append("]");
         return sb.toString();
     }
 

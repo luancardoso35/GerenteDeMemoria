@@ -16,7 +16,9 @@ public class PageTable {
         topoDaPilha = 31;
     }
 
-
+    /*
+    *
+     */
     public void setTexto(ArrayList<Integer> quadros){
         for(int i : quadros){
             setLinha(finalDoHeap +1, new ItemTabelaDePagina((i*32), true));
@@ -73,12 +75,7 @@ public class PageTable {
         }
     }
 
-    /*
-     * Adiciona uma nova linha ao array de linhas
-     */
-    private void setLinha(int index, ItemTabelaDePagina item){
-        linhas[index] = item;
-    }
+
 
     @Override
     public String toString() {
