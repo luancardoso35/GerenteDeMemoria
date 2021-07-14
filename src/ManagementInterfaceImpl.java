@@ -56,6 +56,12 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         int tamanhoTexto = Integer.parseInt(text.get(1).split(" ")[1]);
         int tamanhoDados = Integer.parseInt(text.get(2).split(" ")[1]);
 
+        if(tamanhoTexto <= 1 || tamanhoTexto > 960)
+            throw new FileFormatException("Tamanho do segmento de texto inválido");
+        if(tamanhoDados < 0 || tamanhoDados > 928)
+            throw new FileFormatException("Tamanho do segmento de dados inválido");
+
+
         ArrayList<Integer> quadrosTexto = bf.allocate(tamanhoTexto, mapaBits);
         ArrayList<Integer> quadrosData = bf.allocate(tamanhoDados, mapaBits);
         if (quadrosTexto == null || quadrosData == null) {
@@ -125,7 +131,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (itp == null) {
             throw new InvalidAddressException("Endereço lógico inválido");
         } else {
-            quadro = itp.getQuadro();
+            quadro = itp.getFrame();
         }
 
         return quadro + deslocamentoInt;
