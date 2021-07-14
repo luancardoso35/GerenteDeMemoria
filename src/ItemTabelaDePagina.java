@@ -1,27 +1,27 @@
 public class ItemTabelaDePagina {
-    private int frame;
+    private int quadro;
     private boolean validoInvalido;
     public ItemTabelaDePagina(){
-        frame = -1;
+        quadro = -1;
         validoInvalido = false;
     }
-    public ItemTabelaDePagina(int frame, boolean validoInvalido){
-        this.frame = frame;
+    public ItemTabelaDePagina(int quadro, boolean validoInvalido){
+        this.quadro = quadro;
         this.validoInvalido = validoInvalido;
     }
-    public void setFrame(int frame){
-        this.frame = frame;
+    public void setQuadro(int quadro){
+        this.quadro = quadro;
     }
     public void getValidoInvalido(boolean validoInvalido){
         this.validoInvalido = validoInvalido;
     }
-    public int getFrame(){
-        return frame;
+    public int getQuadro(){
+        return quadro;
     }
     public boolean getValidoInvalido(){
         return validoInvalido;
     }
     public String toString(){
-        return "{" + frame + " ; " + validoInvalido + "}";
+        return "{" + quadro + " ; " + validoInvalido + "}";
     }
 }

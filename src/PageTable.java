@@ -1,28 +1,32 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class PageTable {
-    private String processName;
     private ItemTabelaDePagina[] linhas;
-    private short finalDoHeap;
-    private int ocupacaoUltimaPagina;
-    private short topoDaPilha;
+    private short contadorPaginas;
+    private int ultimaPaginaDados;
+    private int ultimaPaginaHeap;
+    private int ocupacaoUltimaPaginaDados;
+    private int ocupacaoUltimaPaginaHeap;
+    private int tamanhoHeap;
+    private short inicioDaPilha;
 
-    public PageTable(String processName){
-        this.processName = processName;
+    public PageTable(){
         linhas = new ItemTabelaDePagina[32];
-        finalDoHeap = -1;
-        ocupacaoUltimaPagina = -1;  //Quantos bytes são utilizados na última página alocada
-        topoDaPilha = 31;
+        contadorPaginas = -1;
+        inicioDaPilha = 30;
+        tamanhoHeap = 0;
+        ultimaPaginaHeap = -1;
     }
 
     /*
+    * Adiciona as páginas de texto
     *
      */
     public void setTexto(ArrayList<Integer> quadros){
         for(int i : quadros){
-            setLinha(finalDoHeap +1, new ItemTabelaDePagina((i*32), true));
-            finalDoHeap++;
+            setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
+            contadorPaginas++;
         }
     }
 
@@ -32,22 +36,24 @@ public class PageTable {
      */
     public void setDados(ArrayList<Integer> quadros, int tamanhoDados){
         for(int i : quadros){
-            setLinha(finalDoHeap +1, new ItemTabelaDePagina((i*32), true));
-            finalDoHeap++;
+            setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
+            contadorPaginas++;
         }
-        ocupacaoUltimaPagina = (tamanhoDados % 32);
+        ocupacaoUltimaPaginaDados = (tamanhoDados % 32);
+        ultimaPaginaDados = contadorPaginas;
     }
 
     /*
      *Recebe o tamanho do heap e retorna o tamanho que efetivamente será alocado
      */
     public short getRealSizeHeap(int size) {
-        if (ocupacaoUltimaPagina != 0) {
-            int realHeap = (size - (32 - ocupacaoUltimaPagina));
-            ocupacaoUltimaPagina = realHeap % 32;
+        tamanhoHeap += size;
+        if (ocupacaoUltimaPaginaDados != 0) {
+            int realHeap = (size - (32 - ocupacaoUltimaPaginaDados));
+            ocupacaoUltimaPaginaHeap = realHeap % 32;
             return (short) realHeap;
         } else {
-            ocupacaoUltimaPagina = size % 32;
+            ocupacaoUltimaPaginaHeap = size % 32;
             return (short) size;
         }
     }
@@ -56,13 +62,45 @@ public class PageTable {
      *Adiciona as páginas de heap
      */
     public void setHeap(ArrayList<Integer>quadros) throws StackOverflowException {
-        if(topoDaPilha == finalDoHeap){
+        if(inicioDaPilha == contadorPaginas){
             throw new StackOverflowException("Memória requisitada marior do que a disponível");
         }
         for(int i : quadros){
-            setLinha(finalDoHeap +1, new ItemTabelaDePagina((i*32), true));
-            finalDoHeap++;
+            setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
+            contadorPaginas++;
         }
+    }
+
+    public ArrayList<Integer> freeMemoryFromHeap(int size) {
+        if (ultimaPaginaHeap == -1 || size > tamanhoHeap) {
+            return null;
+        }
+
+        ArrayList<Integer> quadrosParaLiberacao = new ArrayList<>();
+
+        //Se a memoria a ser liberada for maior que zero e a ocupação a última página também
+        if (size > 0 && ocupacaoUltimaPaginaHeap != 0) {
+            size -= ocupacaoUltimaPaginaHeap;           //subtrai a quantidade de memória liberada
+            excludeLinha(ultimaPaginaHeap);             //exclui última página
+            quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro());     //adiciona o quadro da última página na lista de quadros a serem liberados
+            ultimaPaginaHeap--;             //atualiza a última página do heap agora
+        }
+
+        //Retira as páginas da tabela até que o total liberado seja menor que 32 bytes
+        while (size / 32 != 0) {
+            if (ultimaPaginaHeap != ultimaPaginaDados) {
+                excludeLinha(ultimaPaginaHeap);
+                quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro());
+                ultimaPaginaHeap--;
+                size -= 32;
+            }
+        }
+
+        if (ultimaPaginaHeap == ultimaPaginaDados) {
+            size -= (32 - ocupacaoUltimaPaginaDados);
+        }
+
+        return size == 0 ? quadrosParaLiberacao: null;
     }
 
     /*
@@ -70,12 +108,10 @@ public class PageTable {
      */
     public void setPilha(ArrayList<Integer>quadros){
         for(int i : quadros){
-            setLinha(topoDaPilha, new ItemTabelaDePagina((i*32), true));
-            topoDaPilha--;
+            setLinha(inicioDaPilha, new ItemTabelaDePagina((i*32), true));
+            inicioDaPilha++;
         }
     }
-
-
 
     @Override
     public String toString() {
@@ -86,23 +122,28 @@ public class PageTable {
                 sb.append(count);
                 sb.append(" ").append(item);
                 sb.append("\n");
-                count++;
             }else{
                 sb.append(count);
-                sb.append(" ").append("{ - ; false}");
+                sb.append(" {").append(" - ; false}");
                 sb.append("\n");
-                count++;
             }
+            count++;
         }
         return sb.toString();
     }
 
-    public String getProcessName() {
-        return processName;
-    }
-
     public ItemTabelaDePagina getLinha(int pagina){
         return linhas[pagina];
+    }
+
+    public ArrayList<Integer> getQuadros() {
+        ArrayList<Integer> quadros = new ArrayList<>();
+        for (ItemTabelaDePagina linha: linhas) {
+            if (linha != null) {
+                quadros.add(linha.getQuadro());
+            }
+        }
+        return quadros;
     }
 
     /*
