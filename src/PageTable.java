@@ -87,6 +87,11 @@ public class PageTable {
                 sb.append(" ").append(item);
                 sb.append("\n");
                 count++;
+            }else{
+                sb.append(count);
+                sb.append(" ").append("{ - ; false}");
+                sb.append("\n");
+                count++;
             }
         }
         return sb.toString();
