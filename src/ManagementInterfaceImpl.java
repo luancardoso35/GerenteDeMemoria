@@ -64,12 +64,14 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
         ArrayList<Integer> quadrosTexto = bf.allocate(tamanhoTexto, mapaBits);
         ArrayList<Integer> quadrosData = bf.allocate(tamanhoDados, mapaBits);
+        ArrayList<Integer> quadrosPilha = bf.allocate(64, mapaBits);
         if (quadrosTexto == null || quadrosData == null) {
             throw new MemoryOverflowException("Não há memória suficiente para alocar o processo");
         }
 
         pt.setTexto(quadrosTexto);
         pt.setDados(quadrosData, tamanhoDados);
+        pt.setPilha(quadrosPilha);
 
         this.pageTableArrayList.add(pt);
         this.pid++;
