@@ -97,6 +97,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             throw new MemoryOverflowException("Não há memória suficiente para alocar o processo");
         }
 
+        //Adiciona as páginas na tabela de página
         pt.setTexto(quadrosTexto);
         pt.setDados(quadrosData, tamanhoDados);
         pt.setPilha(quadrosPilha);
@@ -114,8 +115,8 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             throw new InvalidProcessException("Id de processo inválido");
         }
         PageTable tabelaDoProcesso = pageTableArrayList.get(processId);
-        short realSize = tabelaDoProcesso.getRealSizeHeap(size);
-        ArrayList<Integer> alocacaoHeap = bf.allocate(realSize, mapaBits);
+        short realSize = tabelaDoProcesso.getRealSizeHeap(size);            //Pega a quantidade de memória que efetivamente necessitará novos quadros
+        ArrayList<Integer> alocacaoHeap = bf.allocate(realSize, mapaBits);  //Aloca a quantidade de memória
         if (alocacaoHeap == null) {
             throw new MemoryOverflowException("Não há memória disponível");
         }
@@ -146,7 +147,16 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public void excludeProcessFromMemory(int processId) throws InvalidProcessException {
+        PageTable pt = processoArrayList.get(processId).getTabelaPagina();
+        ArrayList<Integer> quadrosParaLiberacao = pt.getQuadros();
 
+        for (int quadro: quadrosParaLiberacao) {
+            int nroQuadro = quadro/32;
+            mapaBits[nroQuadro] = false;
+        }
+
+        processoArrayList.set(processId, null);
+        pageTableArrayList.set(processId, null);
     }
 
     @Override
@@ -198,7 +208,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (processId < 0 || processId >= pageTableArrayList.size()) {
             throw new InvalidProcessException("Processo inválido");
         }
-        return pageTableArrayList.get(processId).toString();
+        return processoArrayList.get(processId).getTabelaPagina().toString();
     }
 
     @Override

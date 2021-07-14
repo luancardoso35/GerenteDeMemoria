@@ -69,6 +69,7 @@ public class PageTable {
             setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
             contadorPaginas++;
         }
+        ultimaPaginaHeap = contadorPaginas;
     }
 
     public ArrayList<Integer> freeMemoryFromHeap(int size) {
@@ -151,5 +152,14 @@ public class PageTable {
      */
     private void setLinha(int index, ItemTabelaDePagina item){
         linhas[index] = item;
+    }
+
+    /*
+    *Exclui uma linha
+    * @param index index da linha
+     */
+    private void excludeLinha(int index){
+        linhas[index] = null;
+        contadorPaginas--;
     }
 }
