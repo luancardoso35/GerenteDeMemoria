@@ -88,6 +88,7 @@ public class PageTable {
             setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
             contadorPaginas++;
         }
+        ultimaPaginaHeap = contadorPaginas;
     }
 
     public ArrayList<Integer> freeMemoryFromHeap(int size) {
@@ -158,9 +159,8 @@ public class PageTable {
     public ArrayList<Integer> getQuadros() {
         ArrayList<Integer> quadros = new ArrayList<>();
         for (ItemTabelaDePagina linha: linhas) {
-            if (linha != null) {
-                quadros.add(linha.getQuadro());
-            }
+            quadros.add(linha.getQuadro());
+
         }
         return quadros;
     }
@@ -170,5 +170,15 @@ public class PageTable {
      */
     private void setLinha(int index, ItemTabelaDePagina item){
         linhas[index] = item;
+    }
+
+    /*
+    *Exclui uma linha
+    * @param index index da linha
+     */
+    private void excludeLinha(int index){
+        linhas[index].setQuadro(-1);
+        linhas[index].setValidoInvalido(false);
+        contadorPaginas--;
     }
 }

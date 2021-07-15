@@ -12,7 +12,7 @@ public class ItemTabelaDePagina {
     public void setQuadro(int quadro) {
         this.quadro = quadro;
     }
-    public void getValidoInvalido(boolean validoInvalido){
+    public void setValidoInvalido(boolean validoInvalido){
         this.validoInvalido = validoInvalido;
     }
     public int getQuadro(){
