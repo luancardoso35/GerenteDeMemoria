@@ -51,9 +51,9 @@ public class PageTable {
     public int getRealSizeHeap(int size) {
         if (tamanhoHeap == 0) {
             tamanhoHeap += size;
-            if (size < (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
+            if (size <= (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
                 ocupacaoUltimaPaginaHeap = Math.abs(ocupacaoUltimaPaginaDados - size);
-                return ocupacaoUltimaPaginaHeap;
+                return 0;
             } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso a sobra na última página seja maior que o quanto se quer alocar
                 int realHeap = size - (32 - ocupacaoUltimaPaginaDados);
                 ocupacaoUltimaPaginaHeap = realHeap % 32;
