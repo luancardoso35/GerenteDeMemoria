@@ -9,7 +9,7 @@ public class ItemTabelaDePagina {
         this.quadro = quadro;
         this.validoInvalido = validoInvalido;
     }
-    public void setQuadro(int quadro){
+    public void setQuadro(int quadro) {
         this.quadro = quadro;
     }
     public void getValidoInvalido(boolean validoInvalido){

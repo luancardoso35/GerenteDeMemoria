@@ -10,6 +10,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     private ArrayList<Processo> processoArrayList;
     private ArrayList<PageTable> pageTableArrayList;
     private BestFit bf;
+    private int espacoLivre;
 
     public ManagementInterfaceImpl (short nroQuadros) {
         bf = new BestFit();
@@ -20,6 +21,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
         this.nroQuadros = nroQuadros;
         mapaBits = new boolean[nroQuadros];
+        espacoLivre = nroQuadros * 32;
         Arrays.fill(mapaBits, false);
         pageTableArrayList = new ArrayList<>();
         processoArrayList = new ArrayList<>();
@@ -35,7 +37,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
             //Confere a formatação do arquivo
             if(text.size() != 3){
-                throw new FileFormatException("Formatação do arquivo errada");
+                throw new FileFormatException("ERRO: Formatação do arquivo errada");
             }else{
                 if (!text.get(0).matches("program \\w+")) {
                     throw new FileFormatException("O nome do arquivo deve ser igual ao nome do processo");
@@ -49,9 +51,9 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             }
 
         } catch (FileNotFoundException fnfe) {
-            throw new NoSuchFileException("Arquivo não encontrado");
+            throw new NoSuchFileException("ERRO: Arquivo não encontrado");
         } catch (IOException ioe) {
-            System.out.println("Erro de leitura.");
+            return -1;
         }
 
         //Extrai o tamanho dos textos e dos dados
@@ -62,6 +64,9 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             throw new FileFormatException("Tamanho do segmento de texto inválido");
         if(tamanhoDados < 0 || tamanhoDados > 928)
             throw new FileFormatException("Tamanho do segmento de dados inválido");
+        if (tamanhoDados + tamanhoTexto + 64 > espacoLivre) {
+            throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
+        }
 
         int idNovoProcesso = getIdNovoProcesso();
         if (idNovoProcesso == -1) {
@@ -83,24 +88,30 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             }
             ArrayList<Integer> quadrosProcessoOriginal = new ArrayList<>();
             for (int i = 0; i < nroQuadrosTexto; i++) {
-                quadrosProcessoOriginal.add(duplicatedProcess.getTabelaPagina().getLinha(i).getQuadro());
+                quadrosProcessoOriginal.add(duplicatedProcess.getTabelaPagina().getLinha(i).getQuadro()/32);
             }
             p.getTabelaPagina().setTexto(quadrosProcessoOriginal);
         } else {    //Caso não haja um processo repetido, aloca novos quadros
             quadrosTexto = bf.allocate(tamanhoTexto, mapaBits);
+            if (quadrosTexto == null || quadrosTexto.size() == 0) {
+                throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
+            }
+            editBitMap(quadrosTexto);
         }
 
         //Aloca os quadros para os dados estáticos e para a pilha
         ArrayList<Integer> quadrosData = bf.allocate(tamanhoDados, mapaBits);
-        ArrayList<Integer> quadrosPilha = bf.allocate(64, mapaBits);
-        if (quadrosTexto.size() == 0 || quadrosData == null) {
-            throw new MemoryOverflowException("Não há memória suficiente para alocar o processo");
+        if (quadrosData == null) {
+            throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
         }
 
-        //Adiciona as páginas na tabela de página
         pt.setTexto(quadrosTexto);
         pt.setDados(quadrosData, tamanhoDados);
         pt.setPilha(quadrosPilha);
+
+        //Subtrai o espaço que será ocupado
+        int espacoOcupado = (quadrosData.size() + quadrosTexto.size() + quadrosPilha.size()) * 32;
+        espacoLivre -= espacoOcupado;
 
         //Adiciona a nova tabela de página e o novo processo nas listas de tabela e de processos respectivamente
         pageTableArrayList.add(idNovoProcesso, pt);
@@ -111,32 +122,47 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public int allocateMemoryToProcess(int processId, int size) throws InvalidProcessException, StackOverflowException, MemoryOverflowException {
-        if(processId < 0 || processId >= pageTableArrayList.size()){
-            throw new InvalidProcessException("Id de processo inválido");
+        if(processId < 0 || processId >= processoArrayList.size()){
+            throw new InvalidProcessException("ERRO: ID de processo inválido");
+        }
+        //Confere se quantidade de heap é suficiente
+        Processo p = processoArrayList.get(processId);
+        int maxTamanhoHeap = 960 - p.getTamanhoSegmentoTexto() - p.getTamanhoSegmentoDados();
+        if (size > maxTamanhoHeap) {
+            throw new MemoryOverflowException("ERRO: Quantidade de memória maior que a disponível" +
+                    " para o processo!");
         }
         PageTable tabelaDoProcesso = pageTableArrayList.get(processId);
-        short realSize = tabelaDoProcesso.getRealSizeHeap(size);            //Pega a quantidade de memória que efetivamente necessitará novos quadros
-        ArrayList<Integer> alocacaoHeap = bf.allocate(realSize, mapaBits);  //Aloca a quantidade de memória
+        short realSize = tabelaDoProcesso.getRealSizeHeap(size);
+        ArrayList<Integer> alocacaoHeap = bf.allocate(realSize, mapaBits);
         if (alocacaoHeap == null) {
             throw new MemoryOverflowException("Não há memória disponível");
         }
 
-        int quadrosAlocados = alocacaoHeap.size();
+            int quadrosAlocados = alocacaoHeap.size();
 
-        try {
-            tabelaDoProcesso.setHeap(alocacaoHeap);
-        } catch (StackOverflowException soe){
-            throw new StackOverflowException(soe.getMessage());
+            try {
+                tabelaDoProcesso.setHeap(alocacaoHeap);
+            } catch (StackOverflowException soe) {
+                throw new StackOverflowException(soe.getMessage());
+            }
+            return quadrosAlocados;
+        } else {
+            return 0;
         }
-
-        return quadrosAlocados;
     }
 
     @Override
     public int freeMemoryFromProcess(int processId, int size) throws InvalidProcessException, NoSuchMemoryException {
+        if (processId < 0 || processId >= pageTableArrayList.size()) {
+            throw new InvalidProcessException("ERRO: Processo inválido");
+        }
         Processo p = processoArrayList.get(processId);
         ArrayList<Integer> quadrosParaLiberacao = p.getTabelaPagina().freeMemoryFromHeap(size);
 
+        if (quadrosParaLiberacao == null) {
+            throw new NoSuchMemoryException("ERRO: Quantidade de memória inválida");
+        }
         for (int quadro: quadrosParaLiberacao) {
             int nroQuadro = quadro/32;
             mapaBits[nroQuadro] = false;
@@ -147,16 +173,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public void excludeProcessFromMemory(int processId) throws InvalidProcessException {
-        PageTable pt = processoArrayList.get(processId).getTabelaPagina();
-        ArrayList<Integer> quadrosParaLiberacao = pt.getQuadros();
 
-        for (int quadro: quadrosParaLiberacao) {
-            int nroQuadro = quadro/32;
-            mapaBits[nroQuadro] = false;
-        }
-
-        processoArrayList.set(processId, null);
-        pageTableArrayList.set(processId, null);
     }
 
     @Override
@@ -169,21 +186,25 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     @Override
     public int getPhysicalAddress(int processId, int logicalAddress) throws InvalidProcessException, InvalidAddressException {
         if (processId < 0 || processId >= pageTableArrayList.size()) {
-            throw new InvalidProcessException("Número de processo inválido");
+            throw new InvalidProcessException("ERRO: Número de processo inválido");
         }
         if(logicalAddress < 0 || logicalAddress > 1023){
-           throw new InvalidProcessException("O endereco lógico deve ser um valor entre 0 e 1023");
+           throw new InvalidProcessException("ERRO: O endereco lógico deve ser um valor entre 0 e 1023");
         }
+        //Garante que o endereço terá 10 digitos
         String enderecoBin = Integer.toBinaryString(logicalAddress);
+        while (enderecoBin.length() != 10) {
+            enderecoBin = "0" + enderecoBin;
+        }
         String paginaStr = enderecoBin.substring(0,5);
         int paginaInt = Integer.parseInt(paginaStr, 2);
-        String deslocamentoStr = enderecoBin.substring(6,10);
+        String deslocamentoStr = enderecoBin.substring(5,10);
         int deslocamentoInt = Integer.parseInt(deslocamentoStr, 2);
 
         ItemTabelaDePagina itp = processoArrayList.get(processId).getTabelaPagina().getLinha(paginaInt);
         int quadro;
         if (itp == null) {
-            throw new InvalidAddressException("Endereço lógico inválido");
+            throw new InvalidAddressException("ERRO: Endereço lógico inválido");
         } else {
             quadro = itp.getQuadro();
         }
@@ -194,10 +215,12 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     @Override
     public String getBitMap() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[ ");
-        for (boolean b: mapaBits) {
-            sb.append(b);
-            sb.append(" ");
+        sb.append("[");
+        for (int i = 0; i < mapaBits.length; i++) {
+            sb.append("(").append(i*32).append(") ").append(mapaBits[i]);
+            if (i != mapaBits.length - 1) {
+                sb.append(", ");
+            }
         }
         sb.append("]");
         return sb.toString();
@@ -206,9 +229,9 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     @Override
     public String getPageTable(int processId) throws InvalidProcessException {
         if (processId < 0 || processId >= pageTableArrayList.size()) {
-            throw new InvalidProcessException("Processo inválido");
+            throw new InvalidProcessException("ERRO: Processo inválido");
         }
-        return processoArrayList.get(processId).getTabelaPagina().toString();
+        return pageTableArrayList.get(processId).toString();
     }
 
     @Override
@@ -216,7 +239,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         String[] processList = new String[processoArrayList.size()];
         int i = 0;
         for (Processo p: processoArrayList) {
-            processList[i] = "{Processo " + p.getNome() + "; id: " + p.getId();
+            processList[i] = String.format("%-30s %-2d", p.getNome(), p.getId());
             i++;
         }
         return processList;
@@ -245,5 +268,11 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             }
         }
         return null;
+    }
+
+    private void editBitMap(ArrayList<Integer> quadros) {
+        quadros.forEach((quadro) -> {
+            mapaBits[quadro] = true;
+        });
     }
 }

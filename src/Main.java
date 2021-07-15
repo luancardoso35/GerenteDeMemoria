@@ -5,13 +5,17 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         int quadros;
         while (true) {
-            System.out.println("Insira a quantidade de quadros desejados (32, 64 ou 128");
-            quadros = Integer.parseInt(sc.nextLine());
-            if (quadros == 32 || quadros == 64 || quadros == 128) {
-                break;
+            System.out.print("Insira a quantidade de quadros desejados (32, 64 ou 128): ");
+            try {
+                quadros = Integer.parseInt(sc.nextLine());
+                if (quadros == 32 || quadros == 64 || quadros == 128) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("ERRO: Insira um número de quadros válido!");
+                continue;
             }
-            System.out.println("Insira um número de quadros válido");
-            quadros = Integer.parseInt(sc.nextLine());
+            System.out.println("ERRO: Insira um número de quadros válido!");
         }
 
         ManagementInterfaceImpl management = new ManagementInterfaceImpl((short) quadros);
@@ -42,14 +46,12 @@ public class Main {
                     int processId;
                     try {
                         processId = management.loadProcessToMemory(nomeArquivo);
-                    } catch (NoSuchFileException e) {
-                        System.out.println("ERRO: Arquivo não encontrado!");
-                        break;
-                    } catch (FileFormatException e) {
-                        System.out.println("ERRO: Arquivo não tem o formato adequado!");
-                        break;
-                    } catch (MemoryOverflowException e) {
-                        System.out.println("ERRO: Não há memória suficiente para carregar o processo!");
+                        if (processId == -1) {
+                            System.out.println("ERRO: erro de leitura");
+                            break;
+                        }
+                    } catch (NoSuchFileException | FileFormatException | MemoryOverflowException e) {
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -62,7 +64,7 @@ public class Main {
                     try {
                         processId = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: O identificador do processo deve ser um número inteiro!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -71,27 +73,20 @@ public class Main {
                     try {
                         tamanhoBloco = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: O tamanho do bloco de memória deve ser um número inteiro!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
                     int memoriaAlocada;
                     try {
                         memoriaAlocada = management.allocateMemoryToProcess(processId, tamanhoBloco);
-                    } catch (InvalidProcessException e) {
-                        System.out.println("ERRO: Identificador do processo inválido!");
-                        break;
-                    } catch (StackOverflowException e) {
-                        System.out.println("ERRO: Tamanho do bloco de memória maior do que" +
-                                " a quantidade de memória disponível para o processo!");
-                        break;
-                    } catch (MemoryOverflowException e) {
-                        System.out.println("ERRO: Não há memória suficiente para atender a solicitação!");
+                    } catch (InvalidProcessException | StackOverflowException | MemoryOverflowException e) {
+                        System.out.println(e.getMessage());
                         break;
                     }
 
                     System.out.println();
-                    System.out.println(memoriaAlocada + " byte(s) alocado(s) com sucesso para o processo com identificador " + processId);
+                    System.out.println(memoriaAlocada + " quadro(s) alocado(s) com sucesso para o processo com identificador " + processId);
                 }
                 case "3" -> {
                     int processId;
@@ -99,7 +94,7 @@ public class Main {
                     try {
                         processId = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: O identificador do processo deve ser um número inteiro!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -108,7 +103,7 @@ public class Main {
                     try {
                         tamanhoBloco = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: A quantidade de memória deve ser um número inteiro!");
+                        System.out.println(e.getMessage());
                         break;
                     }
                     if (tamanhoBloco <= 0) {
@@ -119,17 +114,13 @@ public class Main {
                     int memoriaLiberada;
                     try {
                         memoriaLiberada = management.freeMemoryFromProcess(processId, tamanhoBloco);
-                    } catch (InvalidProcessException e) {
-                        System.out.println("ERRO: Identificador do processo inválido!");
-                        break;
-                    } catch (NoSuchMemoryException e) {
-                        System.out.println("ERRO: A quantidade de memória é maior do que a quantidade" +
-                                " de memória dinâmica alocada para o processo!");
+                    } catch (InvalidProcessException | NoSuchMemoryException e) {
+                        System.out.println(e.getMessage());
                         break;
                     }
 
                     System.out.println();
-                    System.out.println(memoriaLiberada + " byte(s) liberado(s) com sucesso do processo" +
+                    System.out.println(memoriaLiberada + " quadro(s) liberado(s) com sucesso do processo" +
                             " com identificador " + processId);
                 }
                 case "4" -> {
@@ -138,14 +129,14 @@ public class Main {
                     try {
                         processId = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: O identificador do processo deve ser um número inteiro!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
                     try {
                         management.excludeProcessFromMemory(processId);
                     } catch (InvalidProcessException e) {
-                        System.out.println("ERRO: Identificador do processo inválido!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -163,7 +154,7 @@ public class Main {
                     try {
                         processId = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: O identificador do processo deve ser um número inteiro!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -173,11 +164,8 @@ public class Main {
                     int endFisico;
                     try {
                         endFisico = management.getPhysicalAddress(processId, endLogico);
-                    } catch (InvalidProcessException e) {
-                        System.out.println("ERRO: Identificador do processo inválido!");
-                        break;
-                    } catch (InvalidAddressException e) {
-                        System.out.println("ERRO: O endereço lógico inserido é inválido!");
+                    } catch (InvalidProcessException | InvalidAddressException e) {
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -186,7 +174,7 @@ public class Main {
                 }
                 case "7" -> {
                     String mapa = management.getBitMap();
-                    System.out.print(mapa);
+                    System.out.println(mapa);
                 }
                 case "8" -> {
                     int processId;
@@ -194,7 +182,7 @@ public class Main {
                     try {
                         processId = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
-                        System.out.println("ERRO: Identificador do processo inválido!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
@@ -202,12 +190,12 @@ public class Main {
                     try {
                         tabela = management.getPageTable(processId);
                     } catch (InvalidProcessException e) {
-                        System.out.println("ERRO: Identificador do processo inválido!");
+                        System.out.println(e.getMessage());
                         break;
                     }
 
                     System.out.println();
-                    System.out.print(tabela);
+                    System.out.println(tabela);
                 }
                 case "9" -> {
                     String[] processos = management.getProcessList();

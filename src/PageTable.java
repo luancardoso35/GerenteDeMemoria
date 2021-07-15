@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class PageTable {
@@ -13,8 +12,11 @@ public class PageTable {
 
     public PageTable(){
         linhas = new ItemTabelaDePagina[32];
+        for (int i = 0; i < linhas.length; i++) {
+            linhas[i] = new ItemTabelaDePagina(-1, false);
+        }
         contadorPaginas = -1;
-        inicioDaPilha = 30;
+        inicioDaPilha = 31;
         tamanhoHeap = 0;
         ultimaPaginaHeap = -1;
     }
@@ -46,15 +48,32 @@ public class PageTable {
     /*
      *Recebe o tamanho do heap e retorna o tamanho que efetivamente será alocado
      */
-    public short getRealSizeHeap(int size) {
-        tamanhoHeap += size;
-        if (ocupacaoUltimaPaginaDados != 0) {
-            int realHeap = (size - (32 - ocupacaoUltimaPaginaDados));
-            ocupacaoUltimaPaginaHeap = realHeap % 32;
-            return (short) realHeap;
+    public int getRealSizeHeap(int size) {
+        if (tamanhoHeap == 0) {
+            tamanhoHeap += size;
+            if (size <= (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
+                ocupacaoUltimaPaginaHeap = ocupacaoUltimaPaginaDados - size;
+                return 0;
+            } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso a sobra na última página seja maior que o quanto se quer alocar
+                int realHeap = size - (32 - ocupacaoUltimaPaginaDados);
+                ocupacaoUltimaPaginaHeap = realHeap % 32;
+                return realHeap;
+            } else {    //Caso a última página de dados esteja toda ocupada
+                ocupacaoUltimaPaginaHeap = size % 32;
+                return size;
+            }
         } else {
-            ocupacaoUltimaPaginaHeap = size % 32;
-            return (short) size;
+            if (size <= (32-ocupacaoUltimaPaginaHeap)) {
+                ocupacaoUltimaPaginaHeap = ocupacaoUltimaPaginaHeap - size;
+                return 0;
+            } else if (ocupacaoUltimaPaginaHeap != 0) {
+                int realHeap = size - (32 - ocupacaoUltimaPaginaHeap);
+                ocupacaoUltimaPaginaHeap = realHeap % 32;
+                return realHeap;
+            } else {
+                ocupacaoUltimaPaginaHeap = size % 32;
+                return size;
+            }
         }
     }
 
@@ -62,14 +81,13 @@ public class PageTable {
      *Adiciona as páginas de heap
      */
     public void setHeap(ArrayList<Integer>quadros) throws StackOverflowException {
-        if(inicioDaPilha == contadorPaginas){
-            throw new StackOverflowException("Memória requisitada marior do que a disponível");
+        if (contadorPaginas + quadros.size() >= inicioDaPilha) {
+            throw new StackOverflowException("ERRO: Memória requisitada maior do que a disponível");
         }
         for(int i : quadros){
             setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
             contadorPaginas++;
         }
-        ultimaPaginaHeap = contadorPaginas;
     }
 
     public ArrayList<Integer> freeMemoryFromHeap(int size) {
@@ -108,9 +126,9 @@ public class PageTable {
      *Adiciona as páginas de pilha
      */
     public void setPilha(ArrayList<Integer>quadros){
-        for(int i : quadros){
-            setLinha(inicioDaPilha, new ItemTabelaDePagina((i*32), true));
-            inicioDaPilha++;
+        for (int i = quadros.size() - 1; i >= 0; i--){
+            setLinha(inicioDaPilha, new ItemTabelaDePagina((quadros.get(i)*32), true));
+            inicioDaPilha--;
         }
     }
 
@@ -119,7 +137,7 @@ public class PageTable {
         StringBuilder sb = new StringBuilder();
         int count = 0;
         for (ItemTabelaDePagina item: linhas) {
-            if (item != null) {
+            if (item.getQuadro() != -1) {
                 sb.append(count);
                 sb.append(" ").append(item);
                 sb.append("\n");
@@ -152,14 +170,5 @@ public class PageTable {
      */
     private void setLinha(int index, ItemTabelaDePagina item){
         linhas[index] = item;
-    }
-
-    /*
-    *Exclui uma linha
-    * @param index index da linha
-     */
-    private void excludeLinha(int index){
-        linhas[index] = null;
-        contadorPaginas--;
     }
 }
