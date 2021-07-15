@@ -60,7 +60,6 @@ public class BestFit {
                 int tamanho = item[1]/32;
                 for (int i = item[0]; i < tamanho; i++){
                     indexBuracosNaoContiguos.add(i);
-                    mapaBits[i] = true;
                 }
             }
             Collections.sort(indexBuracosNaoContiguos);
@@ -71,7 +70,6 @@ public class BestFit {
 
             for (int i = indexMenorBuraco; i < indexMenorBuraco + quadrosNecessarios; i++) {
                 buracosContiguos.add(i);
-                mapaBits[i] = true;
             }
             return buracosContiguos;
         }

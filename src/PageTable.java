@@ -165,6 +165,24 @@ public class PageTable {
         return quadros;
     }
 
+    public ArrayList<Integer> getQuadrosProcessoDuplicado(int tamanhoSegmentoTexto) {
+        int nroQuadros = tamanhoSegmentoTexto/32;
+
+        if (tamanhoSegmentoTexto % 32 != 0) {
+            nroQuadros++;
+        }
+
+        ArrayList<Integer> quadrosProcessoDuplicado = new ArrayList<>();
+
+        for (int i = nroQuadros; i < linhas.length; i++) {
+            if (linhas[i].getQuadro() != -1) {
+                quadrosProcessoDuplicado.add(linhas[i].getQuadro());
+            }
+        }
+
+        return quadrosProcessoDuplicado;
+    }
+
     /*
      * Adiciona uma nova linha ao array de linhas
      */

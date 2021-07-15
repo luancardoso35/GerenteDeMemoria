@@ -184,8 +184,14 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (processId < 0 || processId >= pageTableArrayList.size()) {
             throw new InvalidProcessException("ERRO: Processo inválido");
         }
-        PageTable pt = processoArrayList.get(processId).getTabelaPagina();
-        ArrayList<Integer> quadrosParaLiberacao = pt.getQuadros();
+        Processo p = processoArrayList.get(processId);
+        PageTable pt = p.getTabelaPagina();
+        ArrayList<Integer> quadrosParaLiberacao = new ArrayList<>();
+        if (duplicatedProcess(p.getNome(), p.getTamanhoSegmentoTexto(), p.getTamanhoSegmentoDados()) != null) {
+            quadrosParaLiberacao = pt.getQuadrosProcessoDuplicado(p.getTamanhoSegmentoTexto());
+        } else {
+            quadrosParaLiberacao = pt.getQuadros();
+        }
 
         for (int quadro: quadrosParaLiberacao) {
             int nroQuadro = quadro/32;
