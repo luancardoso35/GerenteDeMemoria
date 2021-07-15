@@ -186,7 +186,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         }
         Processo p = processoArrayList.get(processId);
         PageTable pt = p.getTabelaPagina();
-        ArrayList<Integer> quadrosParaLiberacao = new ArrayList<>();
+        ArrayList<Integer> quadrosParaLiberacao;
         if (duplicatedProcess(p.getNome(), p.getTamanhoSegmentoTexto(), p.getTamanhoSegmentoDados()) != null) {
             quadrosParaLiberacao = pt.getQuadrosProcessoDuplicado(p.getTamanhoSegmentoTexto());
         } else {
