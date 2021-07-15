@@ -154,6 +154,10 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             } catch (StackOverflowException soe) {
                 throw new StackOverflowException(soe.getMessage());
             }
+
+            for (int quadro: alocacaoHeap) {
+                mapaBits[quadro] = true;
+            }
             return quadrosAlocados;
         } else {
             return 0;
