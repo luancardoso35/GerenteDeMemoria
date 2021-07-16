@@ -23,7 +23,7 @@ public class PageTable {
 
     /*
     * Adiciona as páginas de texto
-    *
+    *@param quadros os indices dos quadros que serão utilizados
      */
     public void setTexto(ArrayList<Integer> quadros){
         for(int i : quadros){
@@ -35,6 +35,8 @@ public class PageTable {
     /*
      *Adiciona as paginas dos dados estáticos e verifica se a última página
      * poderá ser utilizada para armazenar o heap
+     * @param quadros os indices dos quadros que serão utilizados
+     * @param tamanhoDados o tamanho do segmento de dados
      */
     public void setDados(ArrayList<Integer> quadros, int tamanhoDados){
         for(int i : quadros){
@@ -47,14 +49,16 @@ public class PageTable {
 
     /*
      *Recebe o tamanho do heap e retorna o tamanho que efetivamente será alocado
+     * @param size o tamanho do heap que será
+     * @return o quantidade do heap que precisará de novos quadros
      */
     public int getRealSizeHeap(int size) {
-        if (tamanhoHeap == 0) {
+        if (tamanhoHeap == 0) {     //Caso nãp haja memória dinâmica alocada
             tamanhoHeap += size;
             if (size <= (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
                 ocupacaoUltimaPaginaHeap = Math.abs(ocupacaoUltimaPaginaDados - size);
                 return 0;
-            } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso a sobra na última página seja maior que o quanto se quer alocar
+            } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso não tenha sobra na última página
                 int realHeap = size - (32 - ocupacaoUltimaPaginaDados);
                 ocupacaoUltimaPaginaHeap = realHeap % 32;
                 return realHeap;
@@ -62,8 +66,8 @@ public class PageTable {
                 ocupacaoUltimaPaginaHeap = size % 32;
                 return size;
             }
-        } else {
-            if (size <= (32-ocupacaoUltimaPaginaHeap)) {
+        } else {        //Caso haja memória dinâmica alocada
+            if (size <= (32-ocupacaoUltimaPaginaHeap)) {        //Caso caiba tudo na última página do heap
                 ocupacaoUltimaPaginaHeap = ocupacaoUltimaPaginaHeap - size;
                 return 0;
             } else if (ocupacaoUltimaPaginaHeap != 0) {
@@ -79,8 +83,10 @@ public class PageTable {
 
     /*
      *Adiciona as páginas de heap
+     * @param quadros os indices dos quadros que serão alocados
      */
     public void setHeap(ArrayList<Integer>quadros) throws StackOverflowException {
+        //Confere se exite espaço para as novas páginas
         if (contadorPaginas + quadros.size() >= inicioDaPilha) {
             throw new StackOverflowException("ERRO: Memória requisitada maior do que a disponível");
         }
