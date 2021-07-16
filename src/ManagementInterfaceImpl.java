@@ -76,7 +76,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         //Cria um novo processo e uma nova tabela de página
         Processo p = new Processo(idNovoProcesso, processName, tamanhoTexto, tamanhoDados);
         p.createPageTable();
-        PageTable pt = p.getTabelaPagina();
+        PageTable pt = p.getTabelaPagina();     //Pega a tabela de página do processo
 
         ArrayList<Integer> quadrosTexto = new ArrayList<>();
         //Confere se o processo está sendo criado a partir de algum programa já utilizado
