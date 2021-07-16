@@ -21,7 +21,7 @@ public class PageTable {
         ultimaPaginaHeap = 0;
     }
 
-    /*
+    /**
     * Adiciona as páginas de texto
     *@param quadros os indices dos quadros que serão utilizados
      */
@@ -32,7 +32,7 @@ public class PageTable {
         }
     }
 
-    /*
+    /**
      *Adiciona as paginas dos dados estáticos e verifica se a última página
      * poderá ser utilizada para armazenar o heap
      * @param quadros os indices dos quadros que serão utilizados
@@ -47,7 +47,7 @@ public class PageTable {
         ultimaPaginaDados = contadorPaginas;
     }
 
-    /*
+    /**
      *Recebe o tamanho do heap e retorna o tamanho que efetivamente será alocado
      * @param size o tamanho do heap que será
      * @return o quantidade do heap que precisará de novos quadros
@@ -81,7 +81,7 @@ public class PageTable {
         }
     }
 
-    /*
+    /**
      *Adiciona as páginas de heap
      * @param quadros os indices dos quadros que serão alocados
      */
@@ -97,6 +97,11 @@ public class PageTable {
         ultimaPaginaHeap = contadorPaginas;
     }
 
+    /**
+     *Libera páginas de heap
+     * @param size tamanho da memória que será liberada
+     * @return Lista de indices dos quadros que foram tirados
+     */
     public ArrayList<Integer> freeMemoryFromHeap(int size) {
         if (ultimaPaginaHeap == 0 || size > tamanhoHeap) {
             return null;
@@ -134,8 +139,9 @@ public class PageTable {
         return size == 0 ? quadrosParaLiberacao: null;
     }
 
-    /*
+    /**
      *Adiciona as páginas de pilha
+     * @param quadros indices dos quadros a serem alocados
      */
     public void setPilha(ArrayList<Integer>quadros){
         for (int i = quadros.size() - 1; i >= 0; i--){
@@ -143,7 +149,10 @@ public class PageTable {
             inicioDaPilha--;
         }
     }
-
+    /**
+     *Pega uma string contendo informações das paginas da tabela
+     * @return string com páginas da tabela (número, quadro e bit válido-inválido)
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -163,19 +172,33 @@ public class PageTable {
         return sb.toString();
     }
 
+    /**
+     *Obtem uma determinada página da tabela
+     * @param pagina o número da página
+     * @return página
+     */
     public ItemTabelaDePagina getLinha(int pagina){
         return linhas[pagina];
     }
 
+    /**
+     *Obtem os quadros utilizados da tabela de página
+     * @return uma lista com os quadros da tabela
+     */
     public ArrayList<Integer> getQuadros() {
         ArrayList<Integer> quadros = new ArrayList<>();
         for (ItemTabelaDePagina linha: linhas) {
             quadros.add(linha.getQuadro());
-
         }
         return quadros;
     }
 
+    /**
+     *Obtem os quadros utilizados da tabela que não são dedicados a texto
+     * Será utilizado na hora de excluir um processo duplicado
+     * @param tamanhoSegmentoTexto tamanho do segmento de texto
+     * @return uma lista com os quadros que não são de texto
+     */
     public ArrayList<Integer> getQuadrosProcessoDuplicado(int tamanhoSegmentoTexto) {
         int nroQuadros = tamanhoSegmentoTexto/32;
 
@@ -194,14 +217,16 @@ public class PageTable {
         return quadrosProcessoDuplicado;
     }
 
-    /*
-     * Adiciona uma nova linha ao array de linhas
+    /**
+     * Adiciona uma nova página ao array "linhas"
+     * @param index número da pagina/linha
+     * @param item nova página
      */
     private void setLinha(int index, ItemTabelaDePagina item){
         linhas[index] = item;
     }
 
-    /*
+    /**
     *Exclui uma linha
     * @param index index da linha
      */
