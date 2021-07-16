@@ -18,7 +18,7 @@ public class PageTable {
         contadorPaginas = -1;
         inicioDaPilha = 31;
         tamanhoHeap = 0;
-        ultimaPaginaHeap = -1;
+        ultimaPaginaHeap = 0;
     }
 
     /*
@@ -56,7 +56,7 @@ public class PageTable {
         if (tamanhoHeap == 0) {     //Caso nãp haja memória dinâmica alocada
             tamanhoHeap += size;
             if (size <= (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
-                ocupacaoUltimaPaginaHeap = Math.abs(ocupacaoUltimaPaginaDados - size);
+                ocupacaoUltimaPaginaHeap = size % 32;
                 return 0;
             } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso não tenha sobra na última página
                 int realHeap = size - (32 - ocupacaoUltimaPaginaDados);
@@ -67,7 +67,7 @@ public class PageTable {
                 return size;
             }
         } else {        //Caso haja memória dinâmica alocada
-            if (size <= (32-ocupacaoUltimaPaginaHeap)) {        //Caso caiba tudo na última página do heap
+            if (size <= (32 - ocupacaoUltimaPaginaHeap)) {//Caso caiba tudo na última página do heap
                 ocupacaoUltimaPaginaHeap = ocupacaoUltimaPaginaHeap - size;
                 return 0;
             } else if (ocupacaoUltimaPaginaHeap != 0) {
@@ -98,7 +98,7 @@ public class PageTable {
     }
 
     public ArrayList<Integer> freeMemoryFromHeap(int size) {
-        if (ultimaPaginaHeap == -1 || size > tamanhoHeap) {
+        if (ultimaPaginaHeap == 0 || size > tamanhoHeap) {
             return null;
         }
 
@@ -107,23 +107,28 @@ public class PageTable {
         //Se a memoria a ser liberada for maior que zero e a ocupação a última página também
         if (size > 0 && ocupacaoUltimaPaginaHeap != 0) {
             size -= ocupacaoUltimaPaginaHeap;           //subtrai a quantidade de memória liberada
+            quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro() / 32);     //adiciona o quadro da última página na lista de quadros a serem liberados
             excludeLinha(ultimaPaginaHeap);             //exclui última página
-            quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro());     //adiciona o quadro da última página na lista de quadros a serem liberados
             ultimaPaginaHeap--;             //atualiza a última página do heap agora
+            ocupacaoUltimaPaginaHeap = 0;
         }
 
         //Retira as páginas da tabela até que o total liberado seja menor que 32 bytes
         while (size / 32 != 0) {
             if (ultimaPaginaHeap != ultimaPaginaDados) {
                 excludeLinha(ultimaPaginaHeap);
-                quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro());
+                quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro() / 32);
                 ultimaPaginaHeap--;
                 size -= 32;
             }
         }
 
-        if (ultimaPaginaHeap == ultimaPaginaDados) {
-            size -= (32 - ocupacaoUltimaPaginaDados);
+        if (size > 0) {
+            if (ultimaPaginaHeap == ultimaPaginaDados) {
+                size -= (32 - ocupacaoUltimaPaginaDados);
+            } else {
+                ocupacaoUltimaPaginaHeap = (32 - size);
+            }
         }
 
         return size == 0 ? quadrosParaLiberacao: null;

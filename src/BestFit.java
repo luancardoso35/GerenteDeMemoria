@@ -54,7 +54,7 @@ public class BestFit {
                 if (bytes <= 0) {
                     buracosNaoContiguos.add(menorBuraco);
                 }
-            }while (bytes > 0);
+            } while (bytes > 0);
 
             for (int[] item: buracosNaoContiguos) {
                 int tamanho = item[1]/32;

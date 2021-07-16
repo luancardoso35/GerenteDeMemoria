@@ -62,7 +62,13 @@ public class Main {
                     int processId;
                     System.out.print("Insira o identificador do processo: ");
                     try {
-                        processId = Integer.parseInt(sc.nextLine());
+                        String processNumber = sc.nextLine();
+                        if (!processNumber.equals("")) {
+                            processId = Integer.parseInt(sc.nextLine());
+                        } else {
+                            System.out.println("ERRO: número de processo inválido");
+                            break;
+                        }
                     } catch (NumberFormatException e) {
                         System.out.println(e.getMessage());
                         break;

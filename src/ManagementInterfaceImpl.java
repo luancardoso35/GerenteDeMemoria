@@ -96,7 +96,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             if (quadrosTexto == null || quadrosTexto.size() == 0) {
                 throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
             }
-            editBitMap(quadrosTexto);   //Passa o estado dos quadros utilizados para true
+            editBitMap(quadrosTexto, true);   //Passa o estado dos quadros utilizados para true
         }
 
         //Aloca os quadros para os dados estáticos e para a pilha
@@ -104,12 +104,12 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (quadrosData == null) {
             throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
         }
-        editBitMap(quadrosData);
+        editBitMap(quadrosData, true);
         ArrayList<Integer> quadrosPilha = bf.allocate(64, mapaBits);
         if (quadrosPilha == null) {
             throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
         }
-        editBitMap(quadrosPilha);
+        editBitMap(quadrosPilha, true);
 
         //Adiciona as páginas na tabela de página
         pt.setTexto(quadrosTexto);
@@ -159,7 +159,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
                 throw new StackOverflowException(soe.getMessage());
             }
 
-            editBitMap(alocacaoHeap);   //Passa o estado dos quadros utilizados para true
+            editBitMap(alocacaoHeap, true);   //Passa o estado dos quadros utilizados para true
 
             return quadrosAlocados;
         } else {
@@ -181,10 +181,8 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (quadrosParaLiberacao == null) {
             throw new NoSuchMemoryException("ERRO: Quantidade de memória inválida");
         }
-        for (int quadro: quadrosParaLiberacao) {
-            int nroQuadro = quadro/32;      //Converte quadro para o index do array
-            mapaBits[nroQuadro] = false;
-        }
+
+        editBitMap(quadrosParaLiberacao, false);
 
         return quadrosParaLiberacao.size(); //Retorna quantidade de quadros liberados
     }
@@ -324,7 +322,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     *Define quadros como "utilizados" (true)
     * @param quadros os index dos quadros que serão definidos como utilizados
     */
-    private void editBitMap(ArrayList<Integer> quadros) {
+    private void editBitMap(ArrayList<Integer> quadros, boolean value) {
         quadros.forEach((quadro) -> {
             mapaBits[quadro] = true;
         });
