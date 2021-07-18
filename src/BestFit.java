@@ -14,7 +14,8 @@ public class BestFit {
      * no algoritmo Best-fit
      * @param bytes a quantidade de bytes a ser alocada
      * @param mapaBits o mapa de bits que corresponde aos quadros
-     * @return uma lista com os indices dos quadros a serem alocados
+     * @return uma lista com os indices dos quadros a serem alocados, ou null caso não haja buracos
+     * para alocação
      */
     public ArrayList<Integer> allocate(int bytes, boolean[] mapaBits) {
         ArrayList<int[]> espacosContiguos = new ArrayList<>();

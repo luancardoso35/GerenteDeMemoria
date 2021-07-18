@@ -13,7 +13,7 @@ public class PageTable {
     public PageTable(){
         linhas = new ItemTabelaDePagina[32];
         for (int i = 0; i < linhas.length; i++) {
-            linhas[i] = new ItemTabelaDePagina(-1, false);
+            linhas[i] = new ItemTabelaDePagina();
         }
         contadorPaginas = -1;
         inicioDaPilha = 31;
@@ -48,8 +48,9 @@ public class PageTable {
     }
 
     /**
-     *Recebe o tamanho do heap e retorna o tamanho que efetivamente será alocado
-     * @param size o tamanho do heap que será
+     * Recebe o número de bytes que deseja se alocar, e retorna a quantidade de bytes
+     * que precisará ser alocada em novos quadros
+     * @param size número de bytes que se deseja alocar
      * @return o quantidade do heap que precisará de novos quadros
      */
     public int getRealSizeHeap(int size) {
@@ -58,7 +59,7 @@ public class PageTable {
             if (size <= (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
                 ocupacaoUltimaPaginaHeap = size % 32;
                 return 0;
-            } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso não tenha sobra na última página
+            } else if (ocupacaoUltimaPaginaDados != 0) {        //Caso caiba apenas uma parte na última página do segmento de dados
                 int realHeap = size - (32 - ocupacaoUltimaPaginaDados);
                 ocupacaoUltimaPaginaHeap = realHeap % 32;
                 return realHeap;
@@ -67,14 +68,14 @@ public class PageTable {
                 return size;
             }
         } else {        //Caso haja memória dinâmica alocada
-            if (size <= (32 - ocupacaoUltimaPaginaHeap)) {//Caso caiba tudo na última página do heap
+            if (size <= (32 - ocupacaoUltimaPaginaHeap)) {//Caso caiba tudo na última página que o heap ocupa
                 ocupacaoUltimaPaginaHeap = ocupacaoUltimaPaginaHeap - size;
                 return 0;
-            } else if (ocupacaoUltimaPaginaHeap != 0) {
+            } else if (ocupacaoUltimaPaginaHeap != 0) { // Caso caiba apenas uma parte na última página que o heap ocupa
                 int realHeap = size - (32 - ocupacaoUltimaPaginaHeap);
                 ocupacaoUltimaPaginaHeap = realHeap % 32;
                 return realHeap;
-            } else {
+            } else { // Caso essa nova memória será alocada apenas em páginas novas
                 ocupacaoUltimaPaginaHeap = size % 32;
                 return size;
             }
@@ -90,53 +91,67 @@ public class PageTable {
         if (contadorPaginas + quadros.size() >= inicioDaPilha) {
             throw new StackOverflowException("ERRO: Memória requisitada maior do que a disponível");
         }
+        // Adiciona cada um dos quadros na tabela de página
         for(int i : quadros){
             setLinha(contadorPaginas +1, new ItemTabelaDePagina((i*32), true));
             contadorPaginas++;
         }
+        // Atualiza a última página ocupada pelo heap
         ultimaPaginaHeap = contadorPaginas;
     }
 
     /**
-     *Libera páginas de heap
+     *Libera heap da memória
      * @param size tamanho da memória que será liberada
-     * @return Lista de indices dos quadros que foram tirados
+     * @return Lista de indices dos quadros que foram liberados, ou nulo caso a memória requisitada para
+     * liberação seja maior que a existente no heap
      */
     public ArrayList<Integer> freeMemoryFromHeap(int size) {
+        // variável que armazena o valor inicial de memória que deseja-se liberar
+        int auxSize = size;
+
+        // Caso o heap esteja vazio ou se queira liberar mais memória do que há no heap
         if (ultimaPaginaHeap == 0 || size > tamanhoHeap) {
             return null;
         }
 
+        // ArrayList que guarda os quadros que serão liberados
         ArrayList<Integer> quadrosParaLiberacao = new ArrayList<>();
 
-        //Se a memoria a ser liberada for maior que zero e a ocupação a última página também
+        //Se a memoria a ser liberada for maior que zero e o heap ocupar uma parte de uma página
         if (size > 0 && ocupacaoUltimaPaginaHeap != 0) {
-            size -= ocupacaoUltimaPaginaHeap;           //subtrai a quantidade de memória liberada
+            size -= ocupacaoUltimaPaginaHeap;           //subtrai da quantidade de memória a ser liberada a ocupação da última página do heap
             quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro() / 32);     //adiciona o quadro da última página na lista de quadros a serem liberados
-            excludeLinha(ultimaPaginaHeap);             //exclui última página
-            ultimaPaginaHeap--;             //atualiza a última página do heap agora
-            ocupacaoUltimaPaginaHeap = 0;
+            excludeLinha(ultimaPaginaHeap);             //exclui última página que o heap ocupava
+            ultimaPaginaHeap--;             //atualiza o valor da última página do heap
+            ocupacaoUltimaPaginaHeap = 0; // o heap ocupa apenas páginas inteiras
         }
 
         //Retira as páginas da tabela até que o total liberado seja menor que 32 bytes
         while (size / 32 != 0) {
+            // confere se a página atual do heap é diferente da última página de dados
             if (ultimaPaginaHeap != ultimaPaginaDados) {
-                excludeLinha(ultimaPaginaHeap);
+                excludeLinha(ultimaPaginaHeap); // exclui a última página que o heap ocupa
+                // adiciona o quadro que foi esvaziado na lista de quadros para liberação
                 quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro() / 32);
-                ultimaPaginaHeap--;
-                size -= 32;
+                ultimaPaginaHeap--; //atualiza o valor da última página do heap
+                size -= 32; // retira o valor de um quadro da quantidade de memória a ser liberada
             }
         }
 
+        // caso após liberar todas as páginas inteiras, ainda exista memória para liberar
         if (size > 0) {
+            // caso o heap esteja na página de dados
             if (ultimaPaginaHeap == ultimaPaginaDados) {
-                size -= (32 - ocupacaoUltimaPaginaDados);
+                ocupacaoUltimaPaginaHeap = 32 - ocupacaoUltimaPaginaDados - size;
             } else {
                 ocupacaoUltimaPaginaHeap = (32 - size);
             }
         }
 
-        return size == 0 ? quadrosParaLiberacao: null;
+        // atualiza a quantidade de memória armazenada no heap, retirando Size bytes
+        tamanhoHeap -= auxSize;
+        return quadrosParaLiberacao;
     }
 
     /**

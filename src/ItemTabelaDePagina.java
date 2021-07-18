@@ -1,10 +1,12 @@
 public class ItemTabelaDePagina {
     private int quadro;
     private boolean validoInvalido;
+
     public ItemTabelaDePagina(){
-        quadro = -1;
-        validoInvalido = false;
+        this.quadro = -1;
+        this.validoInvalido = false;
     }
+
     public ItemTabelaDePagina(int quadro, boolean validoInvalido){
         this.quadro = quadro;
         this.validoInvalido = validoInvalido;
