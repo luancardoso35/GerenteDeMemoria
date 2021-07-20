@@ -4,6 +4,7 @@ public class Main {
     public static void main(String[] args) throws MemoryOverflowException, FileFormatException, NoSuchFileException, InvalidProcessException, StackOverflowException, InvalidAddressException {
         Scanner sc = new Scanner(System.in);
         int quadros;
+        // O usuário insere o número de quadros (só aceita 32, 64 ou 128 quadros)
         while (true) {
             System.out.print("Insira a quantidade de quadros desejados (32, 64 ou 128): ");
             try {
@@ -20,6 +21,8 @@ public class Main {
 
         ManagementInterfaceImpl management = new ManagementInterfaceImpl((short) quadros);
 
+        /* Disponibiliza as opções e chama os métodos da classe ManagementInterfaceImpl
+        de acordo com a opção selecionada */
         String opcao;
         do {
             System.out.println("----------Opções----------");

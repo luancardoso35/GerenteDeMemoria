@@ -1,14 +1,7 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class BestFit {
-
-    public BestFit() {
-
-    }
-
     /**
      * Obtem um ArrayList com os indices dos quadros a serem utilzados para alocar uma certa quantidade de bytes com base
      * no algoritmo Best-fit

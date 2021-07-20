@@ -2,18 +2,27 @@ public class ItemTabelaDePagina {
     private int quadro;
     private boolean validoInvalido;
 
+    /**
+     * Construtor da classe ItemTabelaPagina, que inicializa o quadro como -1
+     * e o bit válido inválido como false
+     */
     public ItemTabelaDePagina(){
         this.quadro = -1;
         this.validoInvalido = false;
     }
 
+    /**
+     * Construtor da classe ItemTabelaPagina
+     * @param quadro o valor do quadro
+     * @param validoInvalido o valor do bit válido inválido
+     */
     public ItemTabelaDePagina(int quadro, boolean validoInvalido){
         this.quadro = quadro;
         this.validoInvalido = validoInvalido;
     }
     /**
      *Define o quadro da página
-     * @param quadro do quadro
+     * @param quadro o valor do quadro
      */
     public void setQuadro(int quadro) {
         this.quadro = quadro;

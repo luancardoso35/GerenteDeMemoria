@@ -10,6 +10,10 @@ public class PageTable {
     private int tamanhoHeap;
     private short inicioDaPilha;
 
+    /**
+     * Construtor da tabela de página, que inicia todas suas linhas como vazias (quadro = -1 e bit válido inválido = false)
+     * e inicializa algumas variáveis
+     */
     public PageTable(){
         linhas = new ItemTabelaDePagina[32];
         for (int i = 0; i < linhas.length; i++) {
@@ -51,9 +55,13 @@ public class PageTable {
      * Recebe o número de bytes que deseja se alocar, e retorna a quantidade de bytes
      * que precisará ser alocada em novos quadros
      * @param size número de bytes que se deseja alocar
+     * @param maxSizeHeap o tamanho máximo que o heap pode ter para aquele processo
      * @return o quantidade do heap que precisará de novos quadros
      */
-    public int getRealSizeHeap(int size) {
+    public int getRealSizeHeap(int size, int maxSizeHeap) {
+        if (size > maxSizeHeap - tamanhoHeap) {
+            return -1;
+        }
         if (tamanhoHeap == 0) {     //Caso nãp haja memória dinâmica alocada
             tamanhoHeap += size;
             if (size <= (32 - ocupacaoUltimaPaginaDados)) {     //Caso caiba tudo na última página do segmento de dados
@@ -120,9 +128,9 @@ public class PageTable {
 
         //Se a memoria a ser liberada for maior que zero e o heap ocupar uma parte de uma página
         if (size > 0 && ocupacaoUltimaPaginaHeap != 0) {
-            size -= ocupacaoUltimaPaginaHeap;           //subtrai da quantidade de memória a ser liberada a ocupação da última página do heap
+            size -= ocupacaoUltimaPaginaHeap;     //subtrai da quantidade de memória a ser liberada a ocupação da última página do heap
             quadrosParaLiberacao.add(linhas[ultimaPaginaHeap].getQuadro() / 32);     //adiciona o quadro da última página na lista de quadros a serem liberados
-            excludeLinha(ultimaPaginaHeap);             //exclui última página que o heap ocupava
+            excludeLinha(ultimaPaginaHeap);      //exclui última página que o heap ocupava
             ultimaPaginaHeap--;             //atualiza o valor da última página do heap
             ocupacaoUltimaPaginaHeap = 0; // o heap ocupa apenas páginas inteiras
         }
@@ -149,7 +157,7 @@ public class PageTable {
             }
         }
 
-        // atualiza a quantidade de memória armazenada no heap, retirando Size bytes
+        // atualiza a quantidade de memória armazenada no heap, retirando auxSize bytes
         tamanhoHeap -= auxSize;
         return quadrosParaLiberacao;
     }

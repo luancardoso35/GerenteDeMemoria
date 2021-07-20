@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 public class Processo {
     private int id;
     private String nome;
@@ -7,6 +5,13 @@ public class Processo {
     private int tamanhoSegmentoDados;
     private PageTable tabelaPagina;
 
+    /**
+     * Construtor do processo
+     * @param id o id do processo
+     * @param nome o nome do processo
+     * @param tamanhoSegmentoTexto o tamanho do segmento de texto daquele processo
+     * @param tamanhoSegmentoDados o tamanho do segmento de dados daquele processo
+     */
     public Processo(int id, String nome, int tamanhoSegmentoTexto, int tamanhoSegmentoDados) {
         this.id = id;
         this.nome = nome;
