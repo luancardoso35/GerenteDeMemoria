@@ -92,7 +92,7 @@ public class Main {
                     }
 
                     System.out.println();
-                    System.out.println(memoriaAlocada + " quadro(s) alocado(s) com sucesso para o processo com identificador " + processId);
+                    System.out.println(memoriaAlocada + " bytes alocados com sucesso para o processo com identificador " + processId);
                 }
                 case "3" -> {
                     int processId;
@@ -105,7 +105,7 @@ public class Main {
                     }
 
                     int tamanhoBloco;
-                    System.out.print("Insira a quantidade de memória a ser liberado: ");
+                    System.out.print("Insira a quantidade de memória a ser liberada: ");
                     try {
                         tamanhoBloco = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
@@ -126,7 +126,7 @@ public class Main {
                     }
 
                     System.out.println();
-                    System.out.println(memoriaLiberada + " quadro(s) liberado(s) com sucesso do processo" +
+                    System.out.println(memoriaLiberada + " bytes liberados com sucesso do processo" +
                             " com identificador " + processId);
                 }
                 case "4" -> {
