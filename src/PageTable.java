@@ -111,7 +111,7 @@ public class PageTable {
         int auxSize = size;
 
         // Caso o heap esteja vazio ou se queira liberar mais memória do que há no heap
-        if (ultimaPaginaHeap == 0 || size > tamanhoHeap) {
+        if (tamanhoHeap == 0 || size > tamanhoHeap) {
             return null;
         }
 
