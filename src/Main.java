@@ -64,7 +64,7 @@ public class Main {
                     try {
                         String processNumber = sc.nextLine();
                         if (!processNumber.equals("")) {
-                            processId = Integer.parseInt(sc.nextLine());
+                            processId = Integer.parseInt(processNumber);
                         } else {
                             System.out.println("ERRO: número de processo inválido");
                             break;
