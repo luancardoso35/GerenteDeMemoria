@@ -159,9 +159,10 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
             editBitMap(alocacaoHeap, true);   //Passa o estado dos quadros utilizados para true
 
+
             return size;
         } else {
-            return 0;
+            return size;
         }
     }
 
