@@ -151,8 +151,6 @@ public class ManagementInterfaceImpl implements ManagementInterface{
                 throw new MemoryOverflowException("ERRO: Não há memória disponível");
             }
 
-            int quadrosAlocados = alocacaoHeap.size();
-
             try {
                 tabelaDoProcesso.setHeap(alocacaoHeap);     //Adiciona as páginas de heap na tabela do processo
             } catch (StackOverflowException soe) {
@@ -161,7 +159,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
             editBitMap(alocacaoHeap, true);   //Passa o estado dos quadros utilizados para true
 
-            return quadrosAlocados;
+            return size;
         } else {
             return 0;
         }
@@ -184,7 +182,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
         editBitMap(quadrosParaLiberacao, false);
 
-        return quadrosParaLiberacao.size(); //Retorna quantidade de quadros liberados
+        return size;
     }
 
     @Override
