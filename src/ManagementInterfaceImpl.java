@@ -300,18 +300,24 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (processId < 0 || processId >= pageTableArrayList.size()) {
             throw new InvalidProcessException("ERRO: Processo inválido");
         }
-        return processoArrayList.get(processId).getTabelaPagina().toString();
+        Processo p = processoArrayList.get(processId);
+        //Confere se processo existe
+        if (p == null) {
+            throw new InvalidProcessException("ERRO: ID de processo inválido");
+        }
+        return p.getTabelaPagina().toString();
     }
 
     @Override
     public String[] getProcessList() {
-        String[] processList = new String[processoArrayList.size()];
+        ArrayList<String> processList = new ArrayList<String>();
         int i = 0;
         for (Processo p: processoArrayList) {
-            processList[i] = String.format("%-30s %-2d", p.getNome(), p.getId());
-            i++;
+            if(p != null) {
+                processList.add(String.format("%-30s %-2d", p.getNome(), p.getId()));
+            }
         }
-        return processList;
+        return processList.toArray(new String[0]);
     }
 
     /**
