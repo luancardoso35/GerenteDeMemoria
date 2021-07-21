@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ListIterator;
 
 public class ManagementInterfaceImpl implements ManagementInterface{
 
@@ -81,7 +82,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
         ArrayList<Integer> quadrosTexto = new ArrayList<>();
         //Confere se o processo está sendo criado a partir de algum programa já utilizado
-        Processo duplicatedProcess = duplicatedProcess(processName, tamanhoTexto, tamanhoDados);
+        Processo duplicatedProcess = searchDuplicatedProcessToAdd(processName, tamanhoTexto, tamanhoDados);
         if (duplicatedProcess != null) {    //Caso haja um processo repetido, utiliza os mesmos quadros de texto
             int nroQuadrosTexto = tamanhoTexto/32;  // Quantidade de quadros necessários para alocar o segmento de texto
             if (tamanhoTexto % 32 != 0) {           //Caso o tamanho de texto não seja multiplo de 32 precisará de um quadro a mais
@@ -219,17 +220,18 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         ArrayList<Integer> quadrosParaLiberacao;
 
         //Confere se o processo que será excluido compartilha quadros de texto com outros processos
-        if (duplicatedProcess(p.getNome(), p.getTamanhoSegmentoTexto(), p.getTamanhoSegmentoDados()) != null) {
+        if (searchDuplicatedProcessToRemove(p.getId(), p.getNome(), p.getTamanhoSegmentoTexto(),
+                p.getTamanhoSegmentoDados()) != null) {
             quadrosParaLiberacao = pt.getQuadrosProcessoDuplicado(p.getTamanhoSegmentoTexto());
         } else {
             quadrosParaLiberacao = pt.getQuadros();
         }
 
-        // coloca os quadros liberados como false no mapa de bits
-        for (int quadro: quadrosParaLiberacao) {
-            int nroQuadro = quadro/32;
-            mapaBits[nroQuadro] = false;
+        for (int i = 0; i < quadrosParaLiberacao.size(); i++) {
+            quadrosParaLiberacao.set(i, quadrosParaLiberacao.get(i) / 32);
         }
+
+        editBitMap(quadrosParaLiberacao, false);
 
         espacoLivre -= quadrosParaLiberacao.size() * 32;
         processoArrayList.set(processId, null);
@@ -310,8 +312,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     @Override
     public String[] getProcessList() {
-        ArrayList<String> processList = new ArrayList<String>();
-        int i = 0;
+        ArrayList<String> processList = new ArrayList<>();
         for (Processo p: processoArrayList) {
             if(p != null) {
                 processList.add(String.format("%-30s %-2d", p.getNome(), p.getId()));
@@ -335,16 +336,35 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     }
 
     /**
-    *Confere se o processo está sendo criado a partir de um programa repetido e retorna o processo que compartilha o mesmo programa
-    * @param processName nome do processo
-    * @param tamanhoTexto tamanho do segmento de texto
-    * @param tamanhoDados tamanho do segmento de dados
-    * @return o processo duplicado
+    * Confere se o processo está sendo criado a partir de um programa repetido
+    * @param processName nome do processo a ser adicionado
+    * @param tamanhoTexto tamanho do segmento de texto do processo a ser adicionado
+    * @param tamanhoDados tamanho do segmento de dados do processo a ser adicionado
+    * @return o processo duplicado, caso exista
      */
-    private Processo duplicatedProcess(String processName, int tamanhoTexto, int tamanhoDados) {
-        Processo p = new Processo(-1, processName, tamanhoTexto, tamanhoDados);
+    private Processo searchDuplicatedProcessToAdd(String processName, int tamanhoTexto, int tamanhoDados) {
         for (Processo processo: processoArrayList) {
-            if (processo.equals(p)) {
+            if (processo.getNome().equals(processName) && processo.getTamanhoSegmentoTexto() == tamanhoTexto
+            && processo.getTamanhoSegmentoDados() == tamanhoDados) {
+                return processo;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Confere, para remover um processo, se existe outro processo que compartilha o mesmo programa.
+     * @param processID o ID do processo que será removido
+     * @param processName o nome do processo a ser removido
+     * @param tamanhoTexto o tamanho do segmento de texto do processo que será removido
+     * @param tamanhoDados o tamanho do segmento de dados do processo que será removido
+     * @return o processo duplicado, caso exista
+     */
+    private Processo searchDuplicatedProcessToRemove(int processID, String processName, int tamanhoTexto, int tamanhoDados) {
+        for (Processo processo: processoArrayList) {
+            if (processo.getId() != processID && processo.getNome().equals(processName) &&
+                    processo.getTamanhoSegmentoTexto() == tamanhoTexto &&
+                    processo.getTamanhoSegmentoDados() == tamanhoDados) {
                 return processo;
             }
         }
