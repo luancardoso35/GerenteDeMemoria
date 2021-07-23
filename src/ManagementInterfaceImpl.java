@@ -1,9 +1,11 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.ListIterator;
 
-public class ManagementInterfaceImpl implements ManagementInterface{
+public class ManagementInterfaceImpl implements ManagementInterface {
 
     private short nroQuadros;
     private boolean[] mapaBits;
@@ -14,9 +16,10 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     /**
      * Construtor interface de gerenciamento de memória
+     *
      * @param nroQuadros o número de quadros informado pelo usuário (32, 64 ou 128)
      */
-    public ManagementInterfaceImpl (short nroQuadros) {
+    public ManagementInterfaceImpl(short nroQuadros) {
         bf = new BestFit();
         this.nroQuadros = nroQuadros;
         mapaBits = new boolean[nroQuadros];     //Inicializa mapa de bits para os quadros de memória (true = utilizado, false = não utilizado)
@@ -29,42 +32,39 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     @Override
     public int loadProcessToMemory(String processName) throws NoSuchFileException, FileFormatException,
             MemoryOverflowException {
-        final ArrayList<String> text = new ArrayList<>();
-        //Abre programa
-        try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir") +
-                "\\src\\" + processName))) {
-            br.lines().forEach(text::add);
 
-            //Confere a formatação do arquivo
-            if(text.size() != 3){
-                throw new FileFormatException("ERRO: Formatação do arquivo errada");
-            }else{
-                if (!text.get(0).matches("program \\w+")) {
-                    throw new FileFormatException("O nome do arquivo deve ser igual ao nome do processo");
-                } else if (!(text.get(0).split(" ")[1] + ".txt").equals(processName) ){
-                    throw new FileFormatException("O nome do arquivo deve ser igual ao nome do processo");
-                } else if (!text.get(1).matches("text \\d+")) {
-                    throw new FileFormatException("Tamanho do segmento de texto inválido");
-                }else if(!text.get(2).matches("data \\d+")) {
-                    throw new FileFormatException("Tamanho do sogmento de dados inválido");
-                }
-            }
-
-        } catch (FileNotFoundException fnfe) {
-            throw new NoSuchFileException("ERRO: Arquivo não encontrado");
-        } catch (IOException ioe) {
-            return -1;
+        Path filePath = Paths.get(processName);
+        String arquivo;
+        try {
+            arquivo = Files.readString(filePath);
+        } catch (IOException e) {
+            throw new NoSuchFileException("ERRO: Arquivo não encontrado, verifique se ele se encontra no mesmo diretório do executável.");
         }
 
+        // Verifica se o arquivo respeita o formato especificado (Considerando EOL = \n (Linux, MacOS) ou \r\n (Windows))
+        if (!arquivo.matches("program [a-zA-Z0-9_.-]+\r?\ntext [0-9]+\r?\ndata [0-9]+\r?\n"))
+            throw new FileFormatException("ERRO: O arquivo não respeita o formato especificado.");
+        String[] linhas = arquivo.split("\r?\n");
+
+            if (!linhas[0].matches("program \\w+")) {
+                throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
+            } else if (!(linhas[1].split(" ")[1] + ".txt").equals(processName)) {
+                throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
+            } else if (!linhas[1].matches("text \\d+")) {
+                throw new FileFormatException("ERRO: Tamanho do segmento de texto inválido");
+            } else if (!linhas[1].matches("data \\d+")) {
+                throw new FileFormatException("ERRO: Tamanho do sogmento de dados inválido");
+            }
+
         //Extrai o tamanho dos textos e dos dados
-        int tamanhoTexto = Integer.parseInt(text.get(1).split(" ")[1]);
-        int tamanhoDados = Integer.parseInt(text.get(2).split(" ")[1]);
+        int tamanhoTexto = Integer.parseInt(linhas[1].split(" ")[1]);
+        int tamanhoDados = Integer.parseInt(linhas[2].split(" ")[1]);
 
         // Confere o tamanho dos segmentos e se o programa pode ser alocado
-        if(tamanhoTexto <= 1 || tamanhoTexto > 960)
-            throw new FileFormatException("Tamanho do segmento de texto inválido");
-        if(tamanhoDados < 0 || tamanhoDados > 928)
-            throw new FileFormatException("Tamanho do segmento de dados inválido");
+        if (tamanhoTexto <= 1 || tamanhoTexto > 960)
+            throw new FileFormatException("ERRO: Tamanho do segmento de texto inválido");
+        if (tamanhoDados < 0 || tamanhoDados > 928)
+            throw new FileFormatException("ERRO: Tamanho do segmento de dados inválido");
         if (tamanhoDados + tamanhoTexto + 64 > espacoLivre) {
             throw new MemoryOverflowException("ERRO: Não há memória suficiente para alocar o processo");
         }
@@ -84,14 +84,14 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         //Confere se o processo está sendo criado a partir de algum programa já utilizado
         Processo duplicatedProcess = searchDuplicatedProcessToAdd(processName, tamanhoTexto, tamanhoDados);
         if (duplicatedProcess != null) {    //Caso haja um processo repetido, utiliza os mesmos quadros de texto
-            int nroQuadrosTexto = tamanhoTexto/32;  // Quantidade de quadros necessários para alocar o segmento de texto
+            int nroQuadrosTexto = tamanhoTexto / 32;  // Quantidade de quadros necessários para alocar o segmento de texto
             if (tamanhoTexto % 32 != 0) {           //Caso o tamanho de texto não seja multiplo de 32 precisará de um quadro a mais
                 nroQuadrosTexto++;
             }
             ArrayList<Integer> quadrosProcessoOriginal = new ArrayList<>();
             // Insere em quadrosProcessoOriginal todos os índices dos quadros do segmento de texto do processo original
             for (int i = 0; i < nroQuadrosTexto; i++) {
-                quadrosProcessoOriginal.add(duplicatedProcess.getTabelaPagina().getLinha(i).getQuadro()/32);
+                quadrosProcessoOriginal.add(duplicatedProcess.getTabelaPagina().getLinha(i).getQuadro() / 32);
             }
             // Insere os quadros de texto do processo original na tabela de página do processo duplicado
             p.getTabelaPagina().setTexto(quadrosProcessoOriginal);
@@ -139,12 +139,12 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         }
 
         // Confere se o ID do processo é válido
-        if(processId < 0 || processId >= processoArrayList.size()){
+        if (processId < 0 || processId >= processoArrayList.size()) {
             throw new InvalidProcessException("ERRO: ID de processo inválido");
         }
 
         Processo p = processoArrayList.get(processId);
-        if(p == null) {
+        if (p == null) {
             throw new InvalidProcessException("ERRO: ID de processo inválido");
         }
 
@@ -156,7 +156,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         }
         // pega a tabela de página do processo
         PageTable tabelaDoProcesso = pageTableArrayList.get(processId);
-        int  realSize = tabelaDoProcesso.getRealSizeHeap(size, maxTamanhoHeap);    //Pega a quantidade de memória que efetivamente necessitará de novos quadros
+        int realSize = tabelaDoProcesso.getRealSizeHeap(size, maxTamanhoHeap);    //Pega a quantidade de memória que efetivamente necessitará de novos quadros
         if (realSize == -1) {
             throw new MemoryOverflowException("ERRO: Não há memória disponível");
         }
@@ -190,7 +190,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
             throw new InvalidProcessException("ERRO: Processo inválido");
         }
         Processo p = processoArrayList.get(processId);      //Pega o determinado processo
-        if(p == null)
+        if (p == null)
             throw new InvalidProcessException("ERRO: ID de processo inválido");
 
         //Libera as páginas de tabela e pega os quadros liberados
@@ -253,8 +253,8 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         if (processId < 0 || processId >= pageTableArrayList.size()) {
             throw new InvalidProcessException("ERRO: Número de processo inválido");
         }
-        if(logicalAddress < 0 || logicalAddress > 1023){
-           throw new InvalidProcessException("ERRO: O endereco lógico deve ser um valor entre 0 e 1023");
+        if (logicalAddress < 0 || logicalAddress > 1023) {
+            throw new InvalidProcessException("ERRO: O endereco lógico deve ser um valor entre 0 e 1023");
         }
         //Converte endereço para binário e garante que o endereço terá 10 digitos
         String enderecoBin = Integer.toBinaryString(logicalAddress);
@@ -263,9 +263,9 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         }
 
         //Pega segmento de página e de deslocamento, e os converte para decimal
-        String paginaStr = enderecoBin.substring(0,5);
+        String paginaStr = enderecoBin.substring(0, 5);
         int paginaInt = Integer.parseInt(paginaStr, 2);
-        String deslocamentoStr = enderecoBin.substring(5,10);
+        String deslocamentoStr = enderecoBin.substring(5, 10);
         int deslocamentoInt = Integer.parseInt(deslocamentoStr, 2);
 
         //Encontra a página na tabela de páginas
@@ -288,7 +288,7 @@ public class ManagementInterfaceImpl implements ManagementInterface{
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < mapaBits.length; i++) {
-            sb.append("(").append(i*32).append(") ").append(mapaBits[i]);
+            sb.append("(").append(i * 32).append(") ").append(mapaBits[i]);
             if (i != mapaBits.length - 1) {
                 sb.append(", ");
             }
@@ -313,8 +313,8 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     @Override
     public String[] getProcessList() {
         ArrayList<String> processList = new ArrayList<>();
-        for (Processo p: processoArrayList) {
-            if(p != null) {
+        for (Processo p : processoArrayList) {
+            if (p != null) {
                 processList.add(String.format("%-30s %-2d", p.getNome(), p.getId()));
             }
         }
@@ -322,9 +322,10 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     }
 
     /**
-    * Pega um identificador para o novo processo
-    * Confere se tem algum identificador livre
-    * @return o identificador disponível ou menos -1 caso seja necessário criar um novo identificador
+     * Pega um identificador para o novo processo
+     * Confere se tem algum identificador livre
+     *
+     * @return o identificador disponível ou menos -1 caso seja necessário criar um novo identificador
      */
     private int getIdNovoProcesso() {
         for (int i = 0; i < processoArrayList.size(); i++) {
@@ -336,16 +337,17 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     }
 
     /**
-    * Confere se o processo está sendo criado a partir de um programa repetido
-    * @param processName nome do processo a ser adicionado
-    * @param tamanhoTexto tamanho do segmento de texto do processo a ser adicionado
-    * @param tamanhoDados tamanho do segmento de dados do processo a ser adicionado
-    * @return o processo duplicado, caso exista
+     * Confere se o processo está sendo criado a partir de um programa repetido
+     *
+     * @param processName  nome do processo a ser adicionado
+     * @param tamanhoTexto tamanho do segmento de texto do processo a ser adicionado
+     * @param tamanhoDados tamanho do segmento de dados do processo a ser adicionado
+     * @return o processo duplicado, caso exista
      */
     private Processo searchDuplicatedProcessToAdd(String processName, int tamanhoTexto, int tamanhoDados) {
-        for (Processo processo: processoArrayList) {
+        for (Processo processo : processoArrayList) {
             if (processo.getNome().equals(processName) && processo.getTamanhoSegmentoTexto() == tamanhoTexto
-            && processo.getTamanhoSegmentoDados() == tamanhoDados) {
+                    && processo.getTamanhoSegmentoDados() == tamanhoDados) {
                 return processo;
             }
         }
@@ -354,14 +356,15 @@ public class ManagementInterfaceImpl implements ManagementInterface{
 
     /**
      * Confere, para remover um processo, se existe outro processo que compartilha o mesmo programa.
-     * @param processID o ID do processo que será removido
-     * @param processName o nome do processo a ser removido
+     *
+     * @param processID    o ID do processo que será removido
+     * @param processName  o nome do processo a ser removido
      * @param tamanhoTexto o tamanho do segmento de texto do processo que será removido
      * @param tamanhoDados o tamanho do segmento de dados do processo que será removido
      * @return o processo duplicado, caso exista
      */
     private Processo searchDuplicatedProcessToRemove(int processID, String processName, int tamanhoTexto, int tamanhoDados) {
-        for (Processo processo: processoArrayList) {
+        for (Processo processo : processoArrayList) {
             if (processo.getId() != processID && processo.getNome().equals(processName) &&
                     processo.getTamanhoSegmentoTexto() == tamanhoTexto &&
                     processo.getTamanhoSegmentoDados() == tamanhoDados) {
@@ -372,9 +375,10 @@ public class ManagementInterfaceImpl implements ManagementInterface{
     }
 
     /**
-    *Define quadros como "utilizados" (true)
-    * @param quadros os index dos quadros que serão definidos como utilizados
-    */
+     * Define quadros como "utilizados" (true)
+     *
+     * @param quadros os index dos quadros que serão definidos como utilizados
+     */
     private void editBitMap(ArrayList<Integer> quadros, boolean value) {
         quadros.forEach((quadro) -> {
             mapaBits[quadro] = true;
