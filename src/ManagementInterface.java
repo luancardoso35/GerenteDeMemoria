@@ -4,7 +4,7 @@
 public interface ManagementInterface {
 
     /** 
-	 * Carrega um processo para a momoria de acordo com a especificacao definida em arquivo 
+	 * Carrega um processo para a memoria de acordo com a especificacao definida em arquivo
 	 * @param processName o nome do arquivo contendo os dados do processo
 	 * @throws NoSuchFileException no caso de um arquivo invalido ou nao encontrado
 	 * @throws FileFormatException no caso de um de violacao do formato de representacao do arquivo
