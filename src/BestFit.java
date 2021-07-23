@@ -1,14 +1,20 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * @author Luan Cesar Cardoso, 11340272
+ * @author Lucas Freitas Pinto Ferreira, 11340289
+ * @author Matheo Bellini Marumo, 11315606
+ * @author Matheus Oliveira Ribeiro da Silva, 11315096
+ */
 public class BestFit {
     /**
      * Obtem um ArrayList com os indices dos quadros a serem utilzados para alocar uma certa quantidade de bytes com base
      * no algoritmo Best-fit
      * @param bytes a quantidade de bytes a ser alocada
      * @param mapaBits o mapa de bits que corresponde aos quadros
-     * @return uma lista com os indices dos quadros a serem alocados, ou null caso não haja buracos
-     * para alocação
+     * @return uma lista com os indices dos quadros a serem alocados, ou null caso nao haja buracos
+     * para alocacao
      */
     public ArrayList<Integer> allocate(int bytes, boolean[] mapaBits) {
         ArrayList<int[]> espacosContiguos = new ArrayList<>();
@@ -34,7 +40,7 @@ public class BestFit {
         if (tamanhoMenorBuraco == 0) {      //Caso não encontre um buraco contíguo grande o suficiente
             ArrayList<int[]> buracosNaoContiguos = new ArrayList<>();
             do{
-                if (tamanhoMenorBuraco == 0) {      //Caso não tenha encontrado um menor buraco para alocar a quantidade de bytes
+                if (tamanhoMenorBuraco == 0) {      //Caso nao tenha encontrado um menor buraco para alocar a quantidade de bytes
                     //Busca o maior buraco contíguo que não irá alocar todos os bytes
                     int[] maiorBuraco = buscaBuraco(false, espacosContiguos, bytes);
                     int indexMaiorBuraco = maiorBuraco[0];
@@ -80,10 +86,10 @@ public class BestFit {
 
     /**
      * Obtém o menor ou maior buraco
-     * @param menor espeficica se o método vai buscar o menor (true) ou o maior buraco (false)
+     * @param menor especifica se o metodo vai buscar o menor (true) ou o maior buraco (false)
      * @param espacosContiguos a lista com os espaços contíguos
      * @param bytes o tamanho do dado a ser alocado
-     * @return array de inteiros onde a primeira posição contém o indice do quadro e a segunda contém o tamanhp
+     * @return array de inteiros onde a primeira posicaoo contem o indice do quadro e a segunda contem o tamanho
      */
     private int[] buscaBuraco(boolean menor, ArrayList<int[]> espacosContiguos, int bytes) {
         if (menor) {

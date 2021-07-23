@@ -5,6 +5,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * @author Luan Cesar Cardoso, 11340272
+ * @author Lucas Freitas Pinto Ferreira, 11340289
+ * @author Matheo Bellini Marumo, 11315606
+ * @author Matheus Oliveira Ribeiro da Silva, 11315096
+ */
+
 public class ManagementInterfaceImpl implements ManagementInterface {
 
     private short nroQuadros;
@@ -15,9 +22,9 @@ public class ManagementInterfaceImpl implements ManagementInterface {
     private int espacoLivre;
 
     /**
-     * Construtor interface de gerenciamento de memória
+     * Construtor interface de gerenciamento de memoria
      *
-     * @param nroQuadros o número de quadros informado pelo usuário (32, 64 ou 128)
+     * @param nroQuadros o numero de quadros informado pelo usuario (32, 64 ou 128)
      */
     public ManagementInterfaceImpl(short nroQuadros) {
         bf = new BestFit();
@@ -48,11 +55,11 @@ public class ManagementInterfaceImpl implements ManagementInterface {
 
             if (!linhas[0].matches("program \\w+")) {
                 throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
-            } else if (!(linhas[1].split(" ")[1] + ".txt").equals(processName)) {
+            } else if (!(linhas[0].split(" ")[1] + ".txt").equals(processName)) {
                 throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
             } else if (!linhas[1].matches("text \\d+")) {
                 throw new FileFormatException("ERRO: Tamanho do segmento de texto inválido");
-            } else if (!linhas[1].matches("data \\d+")) {
+            } else if (!linhas[2].matches("data \\d+")) {
                 throw new FileFormatException("ERRO: Tamanho do sogmento de dados inválido");
             }
 
@@ -325,7 +332,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
      * Pega um identificador para o novo processo
      * Confere se tem algum identificador livre
      *
-     * @return o identificador disponível ou menos -1 caso seja necessário criar um novo identificador
+     * @return o identificador disponivel ou menos -1 caso seja necessario criar um novo identificador
      */
     private int getIdNovoProcesso() {
         for (int i = 0; i < processoArrayList.size(); i++) {
@@ -337,7 +344,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
     }
 
     /**
-     * Confere se o processo está sendo criado a partir de um programa repetido
+     * Confere se o processo esta sendo criado a partir de um programa repetido
      *
      * @param processName  nome do processo a ser adicionado
      * @param tamanhoTexto tamanho do segmento de texto do processo a ser adicionado
@@ -357,10 +364,10 @@ public class ManagementInterfaceImpl implements ManagementInterface {
     /**
      * Confere, para remover um processo, se existe outro processo que compartilha o mesmo programa.
      *
-     * @param processID    o ID do processo que será removido
-     * @param processName  o nome do processo a ser removido
-     * @param tamanhoTexto o tamanho do segmento de texto do processo que será removido
-     * @param tamanhoDados o tamanho do segmento de dados do processo que será removido
+     * @param processID    o ID do processo que sera removido
+     * @param processName  o nome do processo a sera removido
+     * @param tamanhoTexto o tamanho do segmento de texto do processo que sera removido
+     * @param tamanhoDados o tamanho do segmento de dados do processo que sera removido
      * @return o processo duplicado, caso exista
      */
     private Processo searchDuplicatedProcessToRemove(int processID, String processName, int tamanhoTexto, int tamanhoDados) {
@@ -377,7 +384,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
     /**
      * Define quadros como "utilizados" (true)
      *
-     * @param quadros os index dos quadros que serão definidos como utilizados
+     * @param quadros os index dos quadros que serao definidos como utilizados
      */
     private void editBitMap(ArrayList<Integer> quadros, boolean value) {
         quadros.forEach((quadro) -> {

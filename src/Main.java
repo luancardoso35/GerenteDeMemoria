@@ -1,5 +1,12 @@
 import java.util.Scanner;
 
+/**
+ * @author Luan Cesar Cardoso, 11340272
+ * @author Lucas Freitas Pinto Ferreira, 11340289
+ * @author Matheo Bellini Marumo, 11315606
+ * @author Matheus Oliveira Ribeiro da Silva, 11315096
+ */
+
 public class Main {
     public static void main(String[] args) throws MemoryOverflowException, FileFormatException, NoSuchFileException, InvalidProcessException, StackOverflowException, InvalidAddressException {
         Scanner sc = new Scanner(System.in);
@@ -13,10 +20,10 @@ public class Main {
                     break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("ERRO: Insira um número de quadros válido!");
+                System.out.println("ERRO: Insira um numero de quadros válido!");
                 continue;
             }
-            System.out.println("ERRO: Insira um número de quadros válido!");
+            System.out.println("ERRO: Insira um numero de quadros válido!");
         }
 
         ManagementInterfaceImpl management = new ManagementInterfaceImpl((short) quadros);
@@ -59,7 +66,7 @@ public class Main {
                     }
 
                     System.out.println();
-                    System.out.println("Processo carregado com sucesso na memória com identificador " + processId);
+                    System.out.println("Processo carregado com sucesso na memoria com identificador " + processId);
                 }
                 case "2" -> {
                     int processId;
@@ -69,7 +76,7 @@ public class Main {
                         if (!processNumber.equals("")) {
                             processId = Integer.parseInt(processNumber);
                         } else {
-                            System.out.println("ERRO: número de processo inválido");
+                            System.out.println("ERRO: número de processo invalido");
                             break;
                         }
                     } catch (NumberFormatException e) {
@@ -78,7 +85,7 @@ public class Main {
                     }
 
                     int tamanhoBloco;
-                    System.out.print("Insira o tamanho do bloco de memória a ser alocado: ");
+                    System.out.print("Insira o tamanho do bloco de memoria a ser alocado: ");
                     try {
                         tamanhoBloco = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
@@ -108,7 +115,7 @@ public class Main {
                     }
 
                     int tamanhoBloco;
-                    System.out.print("Insira a quantidade de memória a ser liberada: ");
+                    System.out.print("Insira a quantidade de memoria a ser liberada: ");
                     try {
                         tamanhoBloco = Integer.parseInt(sc.nextLine());
                     } catch (NumberFormatException e) {
@@ -116,7 +123,7 @@ public class Main {
                         break;
                     }
                     if (tamanhoBloco <= 0) {
-                        System.out.println("ERRO: A quantidade de memória deve ser maior que 0!");
+                        System.out.println("ERRO: A quantidade de memoria deve ser maior que 0!");
                         break;
                     }
 
@@ -155,7 +162,7 @@ public class Main {
                 case "5" -> {
                     management.resetMemory();
                     System.out.println();
-                    System.out.println("Todos os processos foram excluídos da memória!");
+                    System.out.println("Todos os processos foram excluidos da memoria!");
                 }
                 case "6" -> {
                     int processId;
@@ -168,7 +175,7 @@ public class Main {
                     }
 
                     int endLogico;
-                    System.out.print("Insira o endereço lógico: ");
+                    System.out.print("Insira o endereço logico: ");
                     endLogico = Integer.parseInt(sc.nextLine());
                     int endFisico;
                     try {
@@ -179,7 +186,7 @@ public class Main {
                     }
 
                     System.out.println();
-                    System.out.println("O endereço físico é " + endFisico);
+                    System.out.println("O endereço fisico é " + endFisico);
                 }
                 case "7" -> {
                     String mapa = management.getBitMap();
@@ -213,7 +220,7 @@ public class Main {
                         System.out.println(processo);
                 }
                 case "q()" -> System.out.println("Tchau!");
-                default -> System.out.println("ERRO: Insira uma opção válida!");
+                default -> System.out.println("ERRO: Insira uma opcao valida!");
             }
 
         } while (!opcao.equals("q()"));

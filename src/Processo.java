@@ -1,3 +1,10 @@
+/**
+ * @author Luan Cesar Cardoso, 11340272
+ * @author Lucas Freitas Pinto Ferreira, 11340289
+ * @author Matheo Bellini Marumo, 11315606
+ * @author Matheus Oliveira Ribeiro da Silva, 11315096
+ */
+
 public class Processo {
     private int id;
     private String nome;
@@ -20,7 +27,7 @@ public class Processo {
     }
 
     /**
-     *Instancia a tabela de página do processo
+     *Instancia a tabela de pagina do processo
      */
     public void createPageTable() {
         this.tabelaPagina = new PageTable();
@@ -62,37 +69,10 @@ public class Processo {
 
 
     /**
-     *Obtem a tabela de página do processo
-     * @return tabela de página do processo
+     *Obtem a tabela de pagina do processo
+     * @return tabela de pagina do processo
      */
     public PageTable getTabelaPagina() {
         return tabelaPagina;
     }
-
-    /**
-     *Confere se o processo é igual a outro
-     * @param o o outro processo
-     * @return true se for igual false se não
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null) {
-            return false;
-        }
-
-        if (getClass() != o.getClass()) {
-            return false;
-        }
-
-        //Confere se os processos tem o mesmo nome, tamanho de segmento de texto e dados
-        Processo p = (Processo) o;
-        return this.nome.equals(p.getNome()) && this.tamanhoSegmentoTexto == p.getTamanhoSegmentoTexto()
-                && this.tamanhoSegmentoDados == p.getTamanhoSegmentoDados();
-
-    }
-
 }
