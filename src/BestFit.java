@@ -3,10 +3,10 @@ import java.util.Collections;
 
 /**
  * @author Luan Cesar Cardoso, 11340272
- * @author Lucas Freitas Pinto Ferreira, 11340289
  * @author Matheo Bellini Marumo, 11315606
  * @author Matheus Oliveira Ribeiro da Silva, 11315096
  */
+
 public class BestFit {
     /**
      * Obtem um ArrayList com os indices dos quadros a serem utilzados para alocar uma certa quantidade de bytes com base

@@ -2,7 +2,6 @@ import java.util.Scanner;
 
 /**
  * @author Luan Cesar Cardoso, 11340272
- * @author Lucas Freitas Pinto Ferreira, 11340289
  * @author Matheo Bellini Marumo, 11315606
  * @author Matheus Oliveira Ribeiro da Silva, 11315096
  */
@@ -32,17 +31,20 @@ public class Main {
         de acordo com a opção selecionada */
         String opcao;
         do {
-            System.out.println("----------Opções----------");
-            System.out.println("1) Carregar processo para a memória");
+            System.out.println("--------------------------------------------");
+            System.out.println("             Opções disponíveis             ");
+            System.out.println("--------------------------------------------");
+            System.out.println("1) Carregar novo processo para a memória");
             System.out.println("2) Alocar memória dinâmica para um processo");
             System.out.println("3) Liberar memória dinâmica ocupada por um processo");
             System.out.println("4) Excluir processo da memória");
-            System.out.println("5) Excluir TODOS os processos da memória");
+            System.out.println("5) Excluir todos os processos da memória");
             System.out.println("6) Traduzir um endereço lógico de um processo para um endereço físico");
             System.out.println("7) Obter o mapa de bits");
             System.out.println("8) Obter a tabela de páginas de um processo");
             System.out.println("9) Obter a lista de processos");
             System.out.println("q() Sair do programa");
+            System.out.println("--------------------------------------------");
 
             System.out.print("Digite a opção: ");
             opcao = sc.nextLine();
@@ -219,7 +221,7 @@ public class Main {
                     for (String processo : processos)
                         System.out.println(processo);
                 }
-                case "q()" -> System.out.println("Tchau!");
+                case "q()" -> System.out.println("Saindo...");
                 default -> System.out.println("ERRO: Insira uma opcao valida!");
             }
 
