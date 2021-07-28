@@ -7,7 +7,7 @@ import java.util.Scanner;
  */
 
 public class Main {
-    public static void main(String[] args) throws MemoryOverflowException, FileFormatException, NoSuchFileException, InvalidProcessException, StackOverflowException, InvalidAddressException {
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int quadros;
         // O usuário insere o número de quadros (só aceita 32, 64 ou 128 quadros)
@@ -27,204 +27,110 @@ public class Main {
 
         ManagementInterfaceImpl management = new ManagementInterfaceImpl((short) quadros);
 
-        /* Disponibiliza as opções e chama os métodos da classe ManagementInterfaceImpl
-        de acordo com a opção selecionada */
+        // Capta o comando inserido pelo usuário e verifica qual método a ser invocado, dado o comando
         String opcao;
         do {
-            System.out.println("--------------------------------------------");
-            System.out.println("             Opções disponíveis             ");
-            System.out.println("--------------------------------------------");
-            System.out.println("1) Carregar novo processo para a memória");
-            System.out.println("2) Alocar memória dinâmica para um processo");
-            System.out.println("3) Liberar memória dinâmica ocupada por um processo");
-            System.out.println("4) Excluir processo da memória");
-            System.out.println("5) Excluir todos os processos da memória");
-            System.out.println("6) Traduzir um endereço lógico de um processo para um endereço físico");
-            System.out.println("7) Obter o mapa de bits");
-            System.out.println("8) Obter a tabela de páginas de um processo");
-            System.out.println("9) Obter a lista de processos");
-            System.out.println("q() Sair do programa");
-            System.out.println("--------------------------------------------");
-
-            System.out.print("Digite a opção: ");
+            System.out.print("> ");
             opcao = sc.nextLine();
             System.out.println();
 
-            switch (opcao) {
-                case "1" -> {
-                    System.out.print("Insira o nome do arquivo: ");
-                    String nomeArquivo = sc.nextLine();
+            if (opcao.matches("loadProcessToMemory\\s\\w+\\.\\w+")) {
+                String processName = opcao.split(" ")[1];
+                int processId;
 
-                    int processId;
-                    try {
-                        processId = management.loadProcessToMemory(nomeArquivo);
-                        if (processId == -1) {
-                            System.out.println("ERRO: erro de leitura");
-                            break;
-                        }
-                    } catch (NoSuchFileException | FileFormatException | MemoryOverflowException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    System.out.println();
-                    System.out.println("Processo carregado com sucesso na memoria com identificador " + processId);
+                try {
+                    processId = management.loadProcessToMemory(processName);
+                    System.out.println("Processo carregado com sucesso! ID do processo: " + processId);
+                } catch (NoSuchFileException | FileFormatException | MemoryOverflowException e) {
+                    System.out.println(e.getMessage());
                 }
-                case "2" -> {
-                    int processId;
-                    System.out.print("Insira o identificador do processo: ");
-                    try {
-                        String processNumber = sc.nextLine();
-                        if (!processNumber.equals("")) {
-                            processId = Integer.parseInt(processNumber);
-                        } else {
-                            System.out.println("ERRO: número de processo invalido");
-                            break;
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
+            } else if (opcao.matches("allocateMemoryToProcess\\s\\d+\\s\\d+")) {
+                int processId = Integer.parseInt(opcao.split(" ")[1]);
+                int size = Integer.parseInt(opcao.split(" ")[2]);
 
-                    int tamanhoBloco;
-                    System.out.print("Insira o tamanho do bloco de memoria a ser alocado: ");
-                    try {
-                        tamanhoBloco = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    int memoriaAlocada;
-                    try {
-                        memoriaAlocada = management.allocateMemoryToProcess(processId, tamanhoBloco);
-                    } catch (InvalidProcessException | StackOverflowException | MemoryOverflowException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    System.out.println();
-                    System.out.println(memoriaAlocada + " bytes alocados com sucesso para o processo com identificador " + processId);
+                try {
+                    int allocated = management.allocateMemoryToProcess(processId, size);
+                    System.out.println(allocated + " bytes alocados para o processo " + processId);
+                } catch (InvalidProcessException | StackOverflowException | MemoryOverflowException e) {
+                    System.out.println(e.getMessage());
                 }
-                case "3" -> {
-                    int processId;
-                    System.out.print("Insira o identificador do processo: ");
-                    try {
-                        processId = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
+            } else if (opcao.matches("freeMemoryFromProcess\\s\\d+\\s\\d+")) {
+                int processId = Integer.parseInt(opcao.split(" ")[1]);
+                int size = Integer.parseInt(opcao.split(" ")[2]);
 
-                    int tamanhoBloco;
-                    System.out.print("Insira a quantidade de memoria a ser liberada: ");
-                    try {
-                        tamanhoBloco = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-                    if (tamanhoBloco <= 0) {
-                        System.out.println("ERRO: A quantidade de memoria deve ser maior que 0!");
-                        break;
-                    }
-
-                    int memoriaLiberada;
-                    try {
-                        memoriaLiberada = management.freeMemoryFromProcess(processId, tamanhoBloco);
-                    } catch (InvalidProcessException | NoSuchMemoryException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    System.out.println();
-                    System.out.println(memoriaLiberada + " bytes liberados com sucesso do processo" +
-                            " com identificador " + processId);
+                try {
+                    int released = management.freeMemoryFromProcess(processId, size);
+                    System.out.println(released + " bytes de memória liberados");
+                } catch (InvalidProcessException | NoSuchMemoryException e) {
+                    System.out.println(e.getMessage());
                 }
-                case "4" -> {
-                    int processId;
-                    System.out.print("Insira o identificador do processo: ");
-                    try {
-                        processId = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
+            } else if (opcao.matches("excludeProcessFromMemory\\s\\d+")) {
+                int processId = Integer.parseInt(opcao.split(" ")[1]);
 
-                    try {
-                        management.excludeProcessFromMemory(processId);
-                    } catch (InvalidProcessException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    System.out.println();
-                    System.out.println("Processo com identificador " + processId + " excluído da memória");
+                try {
+                    management.excludeProcessFromMemory(processId);
+                    System.out.println("Processo " + processId + " excluido com sucesso!");
+                } catch (InvalidProcessException e) {
+                    System.out.println(e.getMessage());
                 }
-                case "5" -> {
+            } else if (opcao.matches("resetMemory")) {
                     management.resetMemory();
-                    System.out.println();
-                    System.out.println("Todos os processos foram excluidos da memoria!");
+                    System.out.println("Memória resetada!");
+            } else if (opcao.matches("getPhysicalAddress\\s\\d+\\s\\d+")) {
+                int processId = Integer.parseInt(opcao.split(" ")[1]);
+                int logicalAddress = Integer.parseInt(opcao.split(" ")[2]);
+
+                try {
+                    int physicalAddress = management.getPhysicalAddress(processId, logicalAddress);
+                    System.out.println("Endereço físico referente ao endereço " + logicalAddress + " = " + physicalAddress);
+                } catch (InvalidProcessException | InvalidAddressException e) {
+                    System.out.println(e.getMessage());
                 }
-                case "6" -> {
-                    int processId;
-                    System.out.print("Insira o identificador do processo: ");
-                    try {
-                        processId = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
+            } else if (opcao.equals("getBitMap")) {
+                String mapa = management.getBitMap();
+                System.out.println("Mapa de bits:");
+                System.out.println(mapa);
+            } else if (opcao.matches("getPageTable\\s\\d+")) {
+                int processId = Integer.parseInt(opcao.split(" ")[1]);
 
-                    int endLogico;
-                    System.out.print("Insira o endereço logico: ");
-                    endLogico = Integer.parseInt(sc.nextLine());
-                    int endFisico;
-                    try {
-                        endFisico = management.getPhysicalAddress(processId, endLogico);
-                    } catch (InvalidProcessException | InvalidAddressException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    System.out.println();
-                    System.out.println("O endereço fisico é " + endFisico);
-                }
-                case "7" -> {
-                    String mapa = management.getBitMap();
-                    System.out.println(mapa);
-                }
-                case "8" -> {
-                    int processId;
-                    System.out.print("Insira o identificador do processo: ");
-                    try {
-                        processId = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    String tabela;
-                    try {
-                        tabela = management.getPageTable(processId);
-                    } catch (InvalidProcessException e) {
-                        System.out.println(e.getMessage());
-                        break;
-                    }
-
-                    System.out.println();
+                try {
+                    String tabela = management.getPageTable(processId);
+                    System.out.println("Tabela de página do processo " + processId + ":");
                     System.out.println(tabela);
+                } catch (InvalidProcessException e) {
+                    System.out.println(e.getMessage());
                 }
-                case "9" -> {
-                    String[] processos = management.getProcessList();
-                    System.out.printf("%-30s %-2s%n", "Nome do programa", "Identificador do processo");
-                    for (String processo : processos)
-                        System.out.println(processo);
-                }
-                case "q()" -> System.out.println("Saindo...");
-                default -> System.out.println("ERRO: Insira uma opcao valida!");
+            } else if (opcao.equals("getProcessList")) {
+                String[] processList = management.getProcessList();
+                System.out.printf("%-30s %-2s%n", "Nome do programa", "Identificador do processo");
+                for (String processo : processList)
+                    System.out.println(processo);
+            } else if (opcao.equals("q()")) {
+                System.out.println("Finalizando..");
+                System.exit(0);
+            } else if (opcao.equals("help")) {
+                showCommands();
+            } else {
+                System.out.println("Comando inválido.\n");
             }
-
         } while (!opcao.equals("q()"));
+    }
+
+    private static void showCommands() {
+        System.out.println("---------- Comandos disponíveis ----------");
+        System.out.println("> loadProcessToMemory <nome_arquivo> -> carrega um processo para " +
+                "memória de acordo com a especificação do arquivo");
+        System.out.println("> allocateMemoryToProcess <IdProcesso> <tamanho> -> Aloca o tamanho requisitado de " +
+                "bytes de memória para o processo com o ID especificado");
+        System.out.println("> freeMemoryFromProcess <IdProcesso> <tamanho> -> Libera o tamanho requisitado de" +
+                "bytes de memória para o processo com o ID especificado");
+        System.out.println("> excludeProcessFromMemory <IdProcesso> -> Exclui o processo informado da memória");
+        System.out.println("> resetMemory -> Reestabelece a memória ao seu estado inicial");
+        System.out.println("> getPhysicalAddress <IdProcesso> <endereço> -> " +
+                " Traduz o endereço lógico requisitado, do processo especificado, para um endereço físico");
+        System.out.println("> getBitMap -> Mostra o mapa de bits da memória");
+        System.out.println("> getPageTable <IdProcesso> -> Mostra a tabela de página do processo especificado");
+        System.out.println("> getProcessList -> Mostra todos os processos carregados, junto com seus " +
+                "identificadores");
     }
 }

@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * @author Luan Cesar Cardoso, 11340272
@@ -39,28 +41,35 @@ public class ManagementInterfaceImpl implements ManagementInterface {
     public int loadProcessToMemory(String processName) throws NoSuchFileException, FileFormatException,
             MemoryOverflowException {
 
-        Path filePath = Paths.get(processName);
-        String arquivo;
-        try {
-            arquivo = Files.readString(filePath);
+        StringBuilder text = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(processName))){
+            int value = 0;
+
+            while ((value = br.read()) != -1) {
+                char c = (char)value;
+                text.append(c);
+            }
         } catch (IOException e) {
-            throw new NoSuchFileException("ERRO: Arquivo não encontrado, verifique se ele se encontra no mesmo diretório do executável.");
+            System.out.println("ERRO: Erro na leitura!");
         }
 
         // Verifica se o arquivo respeita o formato especificado (Considerando EOL = \n (Linux, MacOS) ou \r\n (Windows))
-        if (!arquivo.matches("program [a-zA-Z0-9_.-]+\r?\ntext [0-9]+\r?\ndata [0-9]+\r?\n"))
+        if (text.charAt(text.length()-1) != '\n') {
             throw new FileFormatException("ERRO: O arquivo não respeita o formato especificado.");
-        String[] linhas = arquivo.split("\r?\n");
+        }
 
-            if (!linhas[0].matches("program \\w+")) {
-                throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
-            } else if (!(linhas[0].split(" ")[1] + ".txt").equals(processName)) {
-                throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
-            } else if (!linhas[1].matches("text \\d+")) {
-                throw new FileFormatException("ERRO: Tamanho do segmento de texto inválido");
-            } else if (!linhas[2].matches("data \\d+")) {
-                throw new FileFormatException("ERRO: Tamanho do sogmento de dados inválido");
-            }
+        String[] linhas = text.toString().split("\r?\n");
+
+        if (!linhas[0].matches("program \\w+")) {
+            throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
+        } else if (!(linhas[0].split(" ")[1] + ".txt").equals(processName)) {
+            throw new FileFormatException("ERRO: O nome do arquivo deve ser igual ao nome do processo");
+        } else if (!linhas[1].matches("text \\d+")) {
+            throw new FileFormatException("ERRO: Tamanho do segmento de texto inválido");
+        } else if (!linhas[2].matches("data \\d+")) {
+            throw new FileFormatException("ERRO: Tamanho do sogmento de dados inválido");
+        }
 
         //Extrai o tamanho dos textos e dos dados
         int tamanhoTexto = Integer.parseInt(linhas[1].split(" ")[1]);
