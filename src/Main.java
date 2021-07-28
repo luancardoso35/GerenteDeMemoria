@@ -117,20 +117,20 @@ public class Main {
     }
 
     private static void showCommands() {
-        System.out.println("---------- Comandos disponíveis ----------");
-        System.out.println("> loadProcessToMemory <nome_arquivo> -> carrega um processo para " +
+        System.out.println("------------- Comandos disponíveis -------------");
+        System.out.println(">> loadProcessToMemory <nome_arquivo> -> carrega um processo para " +
                 "memória de acordo com a especificação do arquivo");
-        System.out.println("> allocateMemoryToProcess <IdProcesso> <tamanho> -> Aloca o tamanho requisitado de " +
+        System.out.println(">> allocateMemoryToProcess <IdProcesso> <tamanho> -> Aloca o tamanho requisitado de " +
                 "bytes de memória para o processo com o ID especificado");
-        System.out.println("> freeMemoryFromProcess <IdProcesso> <tamanho> -> Libera o tamanho requisitado de" +
+        System.out.println(">> freeMemoryFromProcess <IdProcesso> <tamanho> -> Libera o tamanho requisitado de" +
                 "bytes de memória para o processo com o ID especificado");
-        System.out.println("> excludeProcessFromMemory <IdProcesso> -> Exclui o processo informado da memória");
-        System.out.println("> resetMemory -> Reestabelece a memória ao seu estado inicial");
-        System.out.println("> getPhysicalAddress <IdProcesso> <endereço> -> " +
+        System.out.println(">> excludeProcessFromMemory <IdProcesso> -> Exclui o processo informado da memória");
+        System.out.println(">> resetMemory -> Reestabelece a memória ao seu estado inicial");
+        System.out.println(">> getPhysicalAddress <IdProcesso> <endereço> -> " +
                 " Traduz o endereço lógico requisitado, do processo especificado, para um endereço físico");
-        System.out.println("> getBitMap -> Mostra o mapa de bits da memória");
-        System.out.println("> getPageTable <IdProcesso> -> Mostra a tabela de página do processo especificado");
-        System.out.println("> getProcessList -> Mostra todos os processos carregados, junto com seus " +
+        System.out.println(">> getBitMap -> Mostra o mapa de bits da memória");
+        System.out.println(">> getPageTable <IdProcesso> -> Mostra a tabela de página do processo especificado");
+        System.out.println(">> getProcessList -> Mostra todos os processos carregados, junto com seus " +
                 "identificadores");
     }
 }
