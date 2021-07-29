@@ -51,7 +51,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
                 text.append(c);
             }
         } catch (IOException e) {
-            System.out.println("ERRO: Erro na leitura!");
+            return -1;
         }
 
         // Verifica se o arquivo respeita o formato especificado (Considerando EOL = \n (Linux, MacOS) ou \r\n (Windows))

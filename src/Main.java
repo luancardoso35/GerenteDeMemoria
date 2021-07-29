@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -40,7 +41,12 @@ public class Main {
 
                 try {
                     processId = management.loadProcessToMemory(processName);
-                    System.out.println("Processo carregado com sucesso! ID do processo: " + processId);
+                    if(processId == -1){
+                        System.out.println("ERRO: Erro na leitura");
+                    }else{
+                        System.out.println("Processo carregado com sucesso! ID do processo: " + processId);
+                    }
+
                 } catch (NoSuchFileException | FileFormatException | MemoryOverflowException e) {
                     System.out.println(e.getMessage());
                 }
