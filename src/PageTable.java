@@ -216,8 +216,10 @@ public class PageTable {
      */
     public ArrayList<Integer> getQuadros() {
         ArrayList<Integer> quadros = new ArrayList<>();
+        int quadro;
         for (ItemTabelaDePagina linha: linhas) {
-            quadros.add(linha.getQuadro());
+            if((quadro = linha.getQuadro()) != -1)
+                quadros.add(quadro);
         }
         return quadros;
     }

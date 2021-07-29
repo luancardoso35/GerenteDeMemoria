@@ -140,8 +140,14 @@ public class ManagementInterfaceImpl implements ManagementInterface {
         espacoLivre -= espacoOcupado;
 
         //Adiciona a nova tabela de página e o novo processo nas listas de tabela e de processos respectivamente
-        pageTableArrayList.add(idNovoProcesso, pt);
-        processoArrayList.add(idNovoProcesso, p);
+        if(idNovoProcesso == processoArrayList.size()){
+            pageTableArrayList.add(idNovoProcesso, pt);
+            processoArrayList.add(idNovoProcesso, p);
+        }else{
+            pageTableArrayList.set(idNovoProcesso, pt);
+            processoArrayList.set(idNovoProcesso, p);
+        }
+
 
         return idNovoProcesso;
     }
@@ -248,7 +254,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
 
         editBitMap(quadrosParaLiberacao, false);
 
-        espacoLivre -= quadrosParaLiberacao.size() * 32;
+        espacoLivre += quadrosParaLiberacao.size() * 32;
         processoArrayList.set(processId, null);
         pageTableArrayList.set(processId, null);
     }
@@ -288,7 +294,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
         int quadro;
 
         // Caso exista um quadro alocado para aquela página, pega o endereço inicial do quadro
-        if (itp == null) {
+        if (itp.getQuadro() == -1) {
             throw new InvalidAddressException("ERRO: Endereço lógico inválido");
         } else {
             quadro = itp.getQuadro();
@@ -361,7 +367,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
      */
     private Processo searchDuplicatedProcessToAdd(String processName, int tamanhoTexto, int tamanhoDados) {
         for (Processo processo : processoArrayList) {
-            if (processo.getNome().equals(processName) && processo.getTamanhoSegmentoTexto() == tamanhoTexto
+            if (processo != null && processo.getNome().equals(processName) && processo.getTamanhoSegmentoTexto() == tamanhoTexto
                     && processo.getTamanhoSegmentoDados() == tamanhoDados) {
                 return processo;
             }
@@ -380,7 +386,7 @@ public class ManagementInterfaceImpl implements ManagementInterface {
      */
     private Processo searchDuplicatedProcessToRemove(int processID, String processName, int tamanhoTexto, int tamanhoDados) {
         for (Processo processo : processoArrayList) {
-            if (processo.getId() != processID && processo.getNome().equals(processName) &&
+            if (processo != null && processo.getId() != processID && processo.getNome().equals(processName) &&
                     processo.getTamanhoSegmentoTexto() == tamanhoTexto &&
                     processo.getTamanhoSegmentoDados() == tamanhoDados) {
                 return processo;
@@ -390,13 +396,13 @@ public class ManagementInterfaceImpl implements ManagementInterface {
     }
 
     /**
-     * Define quadros como "utilizados" (true)
-     *
+     * Define quadros como "utilizados" (true) ou "livres" (false)
      * @param quadros os index dos quadros que serao definidos como utilizados
+     * @param value os novos valores para aqueles quadros
      */
     private void editBitMap(ArrayList<Integer> quadros, boolean value) {
         quadros.forEach((quadro) -> {
-            mapaBits[quadro] = true;
+            mapaBits[quadro] = value;
         });
     }
 }
