@@ -32,8 +32,8 @@ public class PageTable {
     }
 
     /**
-    * Adiciona as paginas de texto
-    *@param quadros os indices dos quadros que serao utilizados
+     * Adiciona as paginas de texto
+     *@param quadros os indices dos quadros que serao utilizados
      */
     public void setTexto(ArrayList<Integer> quadros){
         for(int i : quadros){
@@ -258,8 +258,8 @@ public class PageTable {
     }
 
     /**
-    *Exclui uma linha
-    * @param index index da linha
+     *Exclui uma linha
+     * @param index index da linha
      */
     private void excludeLinha(int index){
         linhas[index].setQuadro(-1);
