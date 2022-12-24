@@ -20,3 +20,6 @@ possui uma parte de tamanho fixo (definida na inicialização do programa na mem
 de tamanho variável (heap), a qual possui inicialmente tamanho 0, podendo aumentar ou diminuir
 dependendo da alocação/liberação dinâmica de memória enquanto o programa permanece em
 execução. 
+
+# Autores
+Trabalho feito por Matheo Marumo e Luan Cardoso
